@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { KoppeltabelTab } from "../components/KoppeltabelTab";
+import { loadSligroData, getKoppeltabel } from "../lib/data";
+import { formatDateTime } from "../lib/format";
+
+const data = await loadSligroData();
+const rows = getKoppeltabel(data);
+---
+
+<Layout title="Koppeltabel" active="koppeltabel" laatsteUpdate={formatDateTime(data.gegenereerd_op)}>
+  <KoppeltabelTab rows={rows} client:load />
+</Layout>

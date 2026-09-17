@@ -1,0 +1,59 @@
+---
+import "../styles/globals.css";
+import Nav from "../components/Nav.astro";
+
+interface Props {
+  title: string;
+  active: "voorraad" | "koppeltabel" | "bestellingen" | "trends" | "inkoopadvies";
+  laatsteUpdate?: string;
+}
+
+const { title, active, laatsteUpdate } = Astro.props;
+---
+
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Sligro-voorraad · Pannenkoekhut</title>
+    <meta
+      name="description"
+      content="Read-only dashboard voor de Sligro-bestelautomatisering van Pannenkoekhut: voorraad, koppeltabel, bestellingen, verkooptrends en inkoopadvies."
+    />
+    <link rel="icon" href="/logo-ov-mark.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Carter+One&family=Figtree:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-full bg-zand text-ink font-body">
+    <div class="flex min-h-screen flex-col desktop:flex-row">
+      <Nav active={active} />
+
+      <div class="flex min-w-0 flex-1 flex-col pb-16 desktop:pb-0">
+        <header
+          class="hidden desktop:flex h-[66px] shrink-0 items-center justify-between border-b border-border-light bg-white px-6"
+        >
+          <h1 class="display text-[22px] leading-none text-ink">{title}</h1>
+          {
+            laatsteUpdate && (
+              <p class="kicker text-[11px] text-text-muted">
+                Data bijgewerkt: {laatsteUpdate}
+              </p>
+            )
+          }
+        </header>
+
+        <main class="flex-1 px-[18px] py-5 desktop:px-6 desktop:py-6">
+          <div class="mx-auto flex max-w-[1100px] flex-col gap-3.5">
+            <h1 class="display text-[26px] leading-tight text-ink desktop:hidden">{title}</h1>
+            <slot />
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

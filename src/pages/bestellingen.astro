@@ -1,0 +1,17 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { LeveringenTab } from "../components/LeveringenTab";
+import { loadSligroData, getLeveringen } from "../lib/data";
+import { formatDateTime } from "../lib/format";
+
+const data = await loadSligroData();
+const leveringen = getLeveringen(data);
+---
+
+<Layout
+  title="Bestellingen & leveringen"
+  active="bestellingen"
+  laatsteUpdate={formatDateTime(data.gegenereerd_op)}
+>
+  <LeveringenTab leveringen={leveringen} client:load />
+</Layout>

@@ -1,0 +1,27 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { InkoopadviesTab } from "../components/InkoopadviesTab";
+import {
+  loadSligroData,
+  getVerkoopPeriodes,
+  getVerkoopPerArtikel,
+  getVoorraadStuksMap,
+} from "../lib/data";
+import { formatDateTime } from "../lib/format";
+
+const data = await loadSligroData();
+const periodes = getVerkoopPeriodes(data);
+const perArtikel = getVerkoopPerArtikel(data);
+const voorraadStuks = getVoorraadStuksMap(data);
+---
+
+<Layout title="Inkoopadvies" active="inkoopadvies" laatsteUpdate={formatDateTime(data.gegenereerd_op)}>
+  <InkoopadviesTab
+    koppeltabel={data.koppeltabel}
+    voorraadStuks={voorraadStuks}
+    verkoopPerArtikel={perArtikel}
+    periodes={periodes}
+    bufferOverrides={data.buffer_overrides}
+    client:load
+  />
+</Layout>

@@ -1,0 +1,54 @@
+---
+import type { VerkoopPerArtikel, VerkoopPeriode } from "../types/sligro";
+
+interface Props {
+  periodes: VerkoopPeriode[];
+  perArtikel: Record<string, VerkoopPerArtikel>;
+}
+
+const { periodes, perArtikel } = Astro.props;
+
+const artikelen = Object.entries(perArtikel)
+  .map(([artikelnummer, item]) => ({ artikelnummer, ...item }))
+  .sort((a, b) => a.omschrijving.localeCompare(b.omschrijving, "nl"));
+---
+
+{
+  periodes.length === 0 || artikelen.length === 0 ? (
+    <div class="rounded-[10px] border border-border-light bg-white px-4 py-8 text-center text-[14px] text-text-muted">
+      Nog geen verkoopdata beschikbaar.
+    </div>
+  ) : (
+    <div class="overflow-x-auto rounded-[10px] border border-border-light bg-white shadow-[var(--shadow-card)]">
+      <table class="w-full border-collapse text-left text-[13px]">
+        <thead>
+          <tr class="border-b border-border-light bg-zand/40">
+            <th class="kicker sticky left-0 bg-zand/40 px-4 py-2.5 text-[11px] text-text-muted">Artikel</th>
+            <th class="kicker px-3 py-2.5 text-[11px] text-text-muted">Sligro-nr.</th>
+            {periodes.map((p) => (
+              <th class="kicker whitespace-nowrap px-3 py-2.5 text-right text-[11px] text-text-muted">
+                {p.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {artikelen.map((art) => (
+            <tr class="border-b border-border-light last:border-b-0">
+              <td class="sticky left-0 bg-white px-4 py-2 text-ink">{art.omschrijving}</td>
+              <td class="px-3 py-2 font-semibold text-text-medium">{art.artikelnummer}</td>
+              {periodes.map((p) => {
+                const waarde = art.verkoop_per_periode[p.label];
+                return (
+                  <td class="px-3 py-2 text-right text-ink">
+                    {waarde === undefined ? "—" : Math.round(waarde)}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

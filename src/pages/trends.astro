@@ -1,0 +1,14 @@
+---
+import Layout from "../layouts/Layout.astro";
+import VerkooptrendsTable from "../components/VerkooptrendsTable.astro";
+import { loadSligroData, getVerkoopPeriodes, getVerkoopPerArtikel } from "../lib/data";
+import { formatDateTime } from "../lib/format";
+
+const data = await loadSligroData();
+const periodes = getVerkoopPeriodes(data);
+const perArtikel = getVerkoopPerArtikel(data);
+---
+
+<Layout title="Verkooptrends" active="trends" laatsteUpdate={formatDateTime(data.gegenereerd_op)}>
+  <VerkooptrendsTable periodes={periodes} perArtikel={perArtikel} />
+</Layout>

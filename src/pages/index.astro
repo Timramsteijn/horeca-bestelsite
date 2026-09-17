@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { VoorraadTab } from "../components/VoorraadTab";
+import { loadSligroData, getVoorraadItems } from "../lib/data";
+import { formatDateTime } from "../lib/format";
+
+const data = await loadSligroData();
+const items = getVoorraadItems(data);
+---
+
+<Layout title="Voorraad" active="voorraad" laatsteUpdate={formatDateTime(data.gegenereerd_op)}>
+  <VoorraadTab items={items} client:load />
+</Layout>

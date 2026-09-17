@@ -1,0 +1,80 @@
+---
+import { Calculator, Link as LinkIcon, Package, TrendingUp, Truck } from "lucide-react";
+
+interface Props {
+  active: "voorraad" | "koppeltabel" | "bestellingen" | "trends" | "inkoopadvies";
+}
+
+const { active } = Astro.props;
+
+const items = [
+  { key: "voorraad", href: "/", label: "Voorraad", Icon: Package },
+  { key: "koppeltabel", href: "/koppeltabel/", label: "Koppeltabel", Icon: LinkIcon },
+  { key: "bestellingen", href: "/bestellingen/", label: "Leveringen", Icon: Truck },
+  { key: "trends", href: "/trends/", label: "Trends", Icon: TrendingUp },
+  { key: "inkoopadvies", href: "/inkoopadvies/", label: "Inkoopadvies", Icon: Calculator },
+] as const;
+---
+
+<!-- Mobiel: navy topbalk met logo + titel -->
+<header
+  class="flex desktop:hidden h-14 shrink-0 items-center gap-2.5 bg-navy px-[18px] text-creme"
+>
+  <img src="/logo-ov-mark.svg" alt="" width="28" height="28" class="shrink-0" />
+  <span class="kicker text-[12px] text-text-on-dark">Sligro-voorraad · Pannenkoekhut</span>
+</header>
+
+<!-- Mobiel: onderste tabbalk, 5 iconen -->
+<nav
+  aria-label="Onderdelen"
+  class="motion fixed inset-x-0 bottom-0 z-10 flex desktop:hidden h-16 items-stretch border-t border-border-light bg-white"
+>
+  {
+    items.map(({ key, href, label, Icon }) => {
+      const isActive = key === active;
+      return (
+        <a
+          href={href}
+          aria-current={isActive ? "page" : undefined}
+          class={`motion flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-semibold ${
+            isActive ? "text-accent-ink" : "text-text-muted"
+          }`}
+        >
+          <Icon size={22} strokeWidth={2} color="currentColor" />
+          {label}
+        </a>
+      );
+    })
+  }
+</nav>
+
+<!-- Desktop: navy zijnav, 232px -->
+<aside class="hidden desktop:flex w-[232px] shrink-0 flex-col bg-navy px-4 py-5 text-creme">
+  <div class="flex items-center gap-2.5 px-2 pb-6">
+    <img src="/logo-ov-mark.svg" alt="" width="32" height="32" class="shrink-0" />
+    <span class="kicker text-[12px] leading-tight text-text-on-dark">
+      Sligro-voorraad<br />Pannenkoekhut
+    </span>
+  </div>
+  <nav aria-label="Onderdelen" class="flex flex-col gap-1">
+    {
+      items.map(({ key, href, label, Icon }) => {
+        const isActive = key === active;
+        return (
+          <a
+            href={href}
+            aria-current={isActive ? "page" : undefined}
+            class={`motion flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[14px] font-semibold ${
+              isActive
+                ? "bg-navy-light text-creme"
+                : "text-text-on-dark hover:bg-navy-light hover:text-creme"
+            }`}
+          >
+            <Icon size={20} strokeWidth={2} color="currentColor" />
+            {label}
+          </a>
+        );
+      })
+    }
+  </nav>
+</aside>
