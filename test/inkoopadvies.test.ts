@@ -33,10 +33,15 @@ describe("berekenInkoopadvies — cross-check tegen echte Sligro-data (Cola, 192
     // par = ROUNDUP(31.428571 * 2 * 1.15) = ROUNDUP(72.285714) = 73
     // verpakkingen nodig = ROUNDUP(73 / 24) = 4
     // vaste voorraad = (4 + 1 buffer) * 24 = 120 stuks
-    // huidige voorraad = 89 → tekort = 31 → te bestellen = ROUNDUP(31/24) = 2
+    // huidige voorraad op proefmoment = 89 → tekort = 31 → te bestellen = ROUNDUP(31/24) = 2
+    //
+    // De voorraad hieronder is bewust een vaste waarde (niet uit het live
+    // bronbestand gelezen): die verandert elke keer dat er een levering
+    // wordt bijgeboekt, en deze test controleert de rekenregel, niet de
+    // actuele voorraadstand.
     const periodeLabels = ["2026-04-01 - 2026-07-01", "2026-09-07 - 2026-09-14"];
     const koppeltabel = data.koppeltabel.filter((row) => row.artikelnummer === "192603");
-    const voorraadStuks = { "192603": data.voorraad["192603"].aantal_stuks };
+    const voorraadStuks = { "192603": 89 };
 
     const resultaat = berekenInkoopadvies(
       koppeltabel,
