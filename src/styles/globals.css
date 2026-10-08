@@ -184,4 +184,20 @@ body {
   .no-print {
     display: none !important;
   }
+
+  /* Bestellijst-print: alleen .print-area tonen, de rest van de pagina
+     (navigatie, modal-overlay, overige content) verbergen. */
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    box-shadow: none;
+  }
 }

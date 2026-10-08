@@ -1,25 +1,27 @@
-import type { KoppeltabelRow, VerkoopPerArtikel, VerkoopPeriode } from "../types/sligro";
+import type { VerkoopPerArtikel, VerkoopPeriode, VoorraadItem } from "../types/sligro";
 
 // Rekenregels 1-op-1 overgenomen uit de sligro-bestelling-skill
 // (scripts/genereer_werkblad.py) — zie PROMPT.md §5.1. Niet wijzigen zonder
-// dat expliciet te vragen: dit is geen nieuw ontwerp.
+// dat expliciet te vragen: dit is geen nieuw ontwerp. De "benodigd uit
+// arrangementen"-term (stap 4b) is de enige toevoeging, zoals gevraagd in de
+// bestel-tool-opdracht (Scherm 6).
 
 export const DEFAULT_WEKEN_VOORUIT = 2;
 export const DEFAULT_BUFFER_PCT = 0.15;
 export const DEFAULT_BUFFER_VERPAKKINGEN = 1;
 
 export interface InkoopadviesRegel {
-  pid: string;
   artikelnummer: string;
-  productnaam: string;
   omschrijving: string;
-  aantal_per_verpakking: number;
+  verpakkingsgrootte: number;
   gem_verkoop_per_week: number;
   par_niveau: number;
   verpakkingen_nodig: number;
   buffer_verpakkingen: number;
   vaste_voorraad_verpakkingen: number;
   vaste_voorraad_stuks: number;
+  benodigd_uit_arrangementen: number;
+  streefvoorraad_stuks: number;
   huidige_voorraad: number;
   tekort: number;
   te_bestellen_verpakkingen: number;
@@ -39,11 +41,11 @@ export function roundUp(value: number, epsilon = 1e-9): number {
 }
 
 export function berekenInkoopadvies(
-  koppeltabel: KoppeltabelRow[],
-  voorraadStuks: Record<string, number>,
+  voorraadItems: VoorraadItem[],
   verkoopPerArtikel: Record<string, VerkoopPerArtikel>,
   periodes: VerkoopPeriode[],
   bufferOverrides: Record<string, number>,
+  benodigdUitArrangementen: Record<string, number>,
   options: InkoopadviesOptions,
 ): InkoopadviesRegel[] {
   const wekenVooruit = options.wekenVooruit ?? DEFAULT_WEKEN_VOORUIT;
@@ -55,10 +57,10 @@ export function berekenInkoopadvies(
     0,
   );
 
-  return koppeltabel
-    .filter((row) => row.status === "zeker")
-    .map((row): InkoopadviesRegel => {
-      const verkoopData = verkoopPerArtikel[row.artikelnummer];
+  return voorraadItems
+    .filter((item) => item.status === "zeker")
+    .map((item): InkoopadviesRegel => {
+      const verkoopData = verkoopPerArtikel[item.artikelnummer];
       const totaalVerkocht = options.periodeLabels.reduce((sum, label) => {
         return sum + (verkoopData?.verkoop_per_periode[label] ?? 0);
       }, 0);
@@ -71,36 +73,41 @@ export function berekenInkoopadvies(
 
       // 3. Verpakkingen nodig
       const verpakkingenNodig =
-        row.aantal_per_verpakking > 0 ? roundUp(parNiveau / row.aantal_per_verpakking) : 0;
+        item.verpakkingsgrootte > 0 ? roundUp(parNiveau / item.verpakkingsgrootte) : 0;
 
-      // 4-5. Vaste voorraad (verpakkingen + stuks)
-      const bufferVerpakkingen = bufferOverrides[row.artikelnummer] ?? DEFAULT_BUFFER_VERPAKKINGEN;
+      // 4. Vaste voorraad (verpakkingen + stuks)
+      const bufferVerpakkingen = bufferOverrides[item.artikelnummer] ?? DEFAULT_BUFFER_VERPAKKINGEN;
       const vasteVoorraadVerpakkingen = verpakkingenNodig + bufferVerpakkingen;
-      const vasteVoorraadStuks = vasteVoorraadVerpakkingen * row.aantal_per_verpakking;
+      const vasteVoorraadStuks = vasteVoorraadVerpakkingen * item.verpakkingsgrootte;
+
+      // 4b. + benodigd uit arrangementen (toekomstige boekingen binnen de
+      // "weken vooruit"-horizon, zie src/lib/arrangementen.ts)
+      const benodigdArrangementen = Math.round((benodigdUitArrangementen[item.artikelnummer] ?? 0) * 100) / 100;
+      const streefvoorraadStuks = vasteVoorraadStuks + benodigdArrangementen;
 
       // Huidige voorraad: altijd hele stuks (§5.3 — brondata kan decimalen
       // bevatten door verdeling over varianten, dat rond je bij weergave/gebruik af).
-      const huidigeVoorraad = Math.round(voorraadStuks[row.artikelnummer] ?? 0);
+      const huidigeVoorraad = Math.round(item.aantal_stuks);
 
-      // 6. Tekort
-      const tekort = Math.max(vasteVoorraadStuks - huidigeVoorraad, 0);
+      // 5. Tekort
+      const tekort = Math.max(streefvoorraadStuks - huidigeVoorraad, 0);
 
-      // 7. Te bestellen (verpakkingen)
+      // 6. Te bestellen (verpakkingen)
       const teBestellenVerpakkingen =
-        tekort > 0 && row.aantal_per_verpakking > 0 ? roundUp(tekort / row.aantal_per_verpakking) : 0;
+        tekort > 0 && item.verpakkingsgrootte > 0 ? roundUp(tekort / item.verpakkingsgrootte) : 0;
 
       return {
-        pid: row.pid,
-        artikelnummer: row.artikelnummer,
-        productnaam: row.productnaam,
-        omschrijving: row.omschrijving,
-        aantal_per_verpakking: row.aantal_per_verpakking,
+        artikelnummer: item.artikelnummer,
+        omschrijving: item.omschrijving,
+        verpakkingsgrootte: item.verpakkingsgrootte,
         gem_verkoop_per_week: gemVerkoopPerWeek,
         par_niveau: parNiveau,
         verpakkingen_nodig: verpakkingenNodig,
         buffer_verpakkingen: bufferVerpakkingen,
         vaste_voorraad_verpakkingen: vasteVoorraadVerpakkingen,
         vaste_voorraad_stuks: vasteVoorraadStuks,
+        benodigd_uit_arrangementen: benodigdArrangementen,
+        streefvoorraad_stuks: streefvoorraadStuks,
         huidige_voorraad: huidigeVoorraad,
         tekort,
         te_bestellen_verpakkingen: teBestellenVerpakkingen,

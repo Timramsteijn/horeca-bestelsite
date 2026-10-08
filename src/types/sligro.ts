@@ -9,12 +9,21 @@ export interface Mutatie {
   bron: string;
 }
 
+// "zeker" = dit artikel komt mee in het Inkoopadvies; "controleer" = koppeling/
+// gegevens nog niet bevestigd. Los van KoppeltabelRow.status (dat gaat over de
+// Lightspeed-verkoopkoppeling, niet over het artikel zelf — een artikel kan
+// bv. alleen via arrangementen ingekocht worden en nooit los verkocht zijn).
+export type ArtikelStatus = "zeker" | "controleer";
+
 export interface VoorraadItem {
   artikelnummer: string;
   omschrijving: string;
   aantal_stuks: number;
+  verpakkingsgrootte: number;
   laatst_bijgewerkt: string;
   laatste_telling: string;
+  status: ArtikelStatus;
+  arrangement_alleen: boolean;
   mutaties: Mutatie[];
 }
 
@@ -54,6 +63,47 @@ export interface Levering {
   artikelen: LeveringArtikel[];
 }
 
+// Eén regel in een arrangement- of optiesjabloon: hoeveel stuks van een
+// Sligro-artikel er per persoon nodig zijn.
+export interface ArrangementItem {
+  sligronummer: string;
+  per_persoon: number;
+}
+
+export interface Arrangement {
+  id: string;
+  naam: string;
+  items: ArrangementItem[];
+}
+
+// Optie-item kan een standaarditem van het arrangement vervangen (vervangt
+// gezet) of erbij komen (vervangt: null).
+export interface OptieItem {
+  sligronummer: string;
+  per_persoon: number;
+  vervangt: string | null;
+}
+
+export interface Optie {
+  id: string;
+  naam: string;
+  items: OptieItem[];
+}
+
+// aantallen per optie zijn een SUBSET van aantal_personen, niet erbovenop.
+export interface Boeking {
+  id: string;
+  arrangement_id: string;
+  datum: string;
+  aantal_personen: number;
+  opties: Record<string, number>;
+}
+
+export interface Instellingen {
+  weken_vooruit: number;
+  buffer_pct: number;
+}
+
 export interface SligroData {
   gegenereerd_op: string;
   voorraad: Record<string, Omit<VoorraadItem, "artikelnummer">>;
@@ -64,4 +114,8 @@ export interface SligroData {
     per_artikel: Record<string, VerkoopPerArtikel>;
   };
   leveringen: Levering[];
+  arrangementen: Arrangement[];
+  opties: Optie[];
+  boekingen: Boeking[];
+  instellingen: Instellingen;
 }

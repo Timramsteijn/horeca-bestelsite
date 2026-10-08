@@ -1,6 +1,8 @@
 import type { Levering } from "../types/sligro";
 import { EmptyState } from "./EmptyState";
 import { formatDate } from "../lib/format";
+import { useSligroData } from "../hooks/useSligroData";
+import { getLeveringen } from "../lib/data";
 
 function VerwerktBadge({ verwerkt }: { verwerkt: boolean }) {
   return (
@@ -63,7 +65,9 @@ function LeveringCard({ levering }: { levering: Levering }) {
   );
 }
 
-export function LeveringenTab({ leveringen }: { leveringen: Levering[] }) {
+export function LeveringenTab() {
+  const data = useSligroData();
+  const leveringen = data ? getLeveringen(data) : [];
   if (leveringen.length === 0) {
     return <EmptyState message="Nog geen leveringen geregistreerd." />;
   }
@@ -71,7 +75,10 @@ export function LeveringenTab({ leveringen }: { leveringen: Levering[] }) {
   return (
     <div className="flex flex-col gap-3">
       {leveringen.map((levering) => (
-        <LeveringCard key={`${levering.referentie}-${levering.besteld_op}`} levering={levering} />
+        <LeveringCard
+          key={`${levering.referentie}-${levering.besteld_op}-${levering.leverdatum}`}
+          levering={levering}
+        />
       ))}
     </div>
   );

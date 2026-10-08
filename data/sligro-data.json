@@ -13,7 +13,10 @@
           "delta": 48,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "155891": {
       "omschrijving": "Affligem Blond 0.0% Krat 24 flesjes x 30 cl",
@@ -33,7 +36,10 @@
           "delta": -4.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "155888": {
       "omschrijving": "Affligem Blond Krat 24 flesjes x 30 cl",
@@ -53,7 +59,10 @@
           "delta": -8.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "761392": {
       "omschrijving": "Affligem Tripel Krat 24 flesjes x 30 cl",
@@ -67,7 +76,10 @@
           "delta": 31,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "195049": {
       "omschrijving": "Almdudler Limonade Krat 24 petflessen x 35 cl",
@@ -87,7 +99,10 @@
           "delta": -2.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "109936": {
       "omschrijving": "Amstel Radler 0.0% Krat 24 flesjes x 30 cl",
@@ -113,7 +128,10 @@
           "delta": -3.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "760435": {
       "omschrijving": "Amstel Radler Krat 24 flesjes x 30 cl",
@@ -127,7 +145,10 @@
           "delta": 42,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "195228": {
       "omschrijving": "Amstel Rosé Krat 4 multipacks x 6 flesjes x 30 cl",
@@ -141,7 +162,10 @@
           "delta": 48,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "711203": {
       "omschrijving": "Apple Bandit Juicy Apple Krat 4 multipacks x 6 flesjes x 30 cl",
@@ -155,7 +179,10 @@
           "delta": 46,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "226609": {
       "omschrijving": "Ben & Jerry's Cookie dough sandwich Doos 25 stuks x 12 cl",
@@ -181,7 +208,10 @@
           "delta": -1.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 25,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "84235": {
       "omschrijving": "Ben & Jerry's Cookie dough, fairtrade Doos 12 bakjes x 10 cl",
@@ -201,7 +231,10 @@
           "delta": -3.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 12,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "46225": {
       "omschrijving": "Brand Weizen 0.0% Krat 4 multipacks x 6 flesjes x 30 cl",
@@ -215,7 +248,10 @@
           "delta": 15,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "93696": {
       "omschrijving": "Bundaberg Ginger Beer Tray 12 flesjes x 37,5 cl",
@@ -241,7 +277,10 @@
           "delta": -1,
           "bron": "bonnetjes na telling 13-09 (niet meegenomen in telling)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 12,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "838327": {
       "omschrijving": "Chaudfontaine Bruisend natuurlijk mineraalwater Krat 24 flesjes x 25 cl",
@@ -267,7 +306,10 @@
           "delta": 24,
           "bron": "2026-09-16"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "547447": {
       "omschrijving": "Chaudfontaine Bruisend natuurlijk mineraalwater Krat 6 flessen x 75 cl",
@@ -287,7 +329,10 @@
           "delta": -1.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 6,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "153070": {
       "omschrijving": "Chaudfontaine Bruisend natuurlijk mineraalwater Krimp 24 petflessen x 50 cl",
@@ -301,7 +346,10 @@
           "delta": 64,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "838335": {
       "omschrijving": "Chaudfontaine Natuurlijk mineraalwater Krat 24 flesjes x 25 cl",
@@ -315,7 +363,10 @@
           "delta": 92,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "547405": {
       "omschrijving": "Chaudfontaine Natuurlijk mineraalwater Krat 6 flessen x 75 cl",
@@ -329,7 +380,10 @@
           "delta": 12,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 6,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "150819": {
       "omschrijving": "Chaudfontaine Natuurlijk mineraalwater Krimp 24 petflessen x 50 cl",
@@ -355,7 +409,10 @@
           "delta": -5.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "165020": {
       "omschrijving": "Chocomel Chocolademelk vol Krat 24 flesjes x 20 cl",
@@ -375,7 +432,10 @@
           "delta": 82,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179560": {
       "omschrijving": "Chocomel Chocolademelk vol Tray 24 blikjes x 25 cl",
@@ -401,7 +461,10 @@
           "delta": -0.4000000000000057,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "192603": {
       "omschrijving": "Coca-Cola Cola regular Krat 24 flesjes x 20 cl",
@@ -433,7 +496,10 @@
           "delta": -4.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "180179": {
       "omschrijving": "Coca-Cola Cola regular Tray 24 blikjes x 33 cl",
@@ -465,7 +531,10 @@
           "delta": -0.4000000000000057,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "940174": {
       "omschrijving": "Coca-Cola Cola zero sugar Krat 24 flesjes x 20 cl",
@@ -497,7 +566,10 @@
           "delta": -18.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179701": {
       "omschrijving": "Coca-Cola Cola zero sugar Tray 24 blikjes x 33 cl",
@@ -529,7 +601,10 @@
           "delta": -0.3999999999999986,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "226605": {
       "omschrijving": "Cornetto Cornetto Pistache max Doos 24 stuks x 11,5 cl",
@@ -543,7 +618,10 @@
           "delta": 30,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "161573": {
       "omschrijving": "Cornetto Cornetto classico Doos 24 stuks x 12,5 cl",
@@ -569,7 +647,10 @@
           "delta": -2.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "173402": {
       "omschrijving": "Daelmans Stroopwafels single Doos 36 wikkels x 39 g",
@@ -589,7 +670,10 @@
           "delta": -7.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 36,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "350866": {
       "omschrijving": "De Lekkerste Gevulde koek roomboter Doos 16 wikkels x 100 g",
@@ -603,7 +687,10 @@
           "delta": 25,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 16,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "482472": {
       "omschrijving": "Doritos Nacho cheese tortilla chips Doos 20 zakjes x 44 g",
@@ -617,7 +704,10 @@
           "delta": 24,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "127441": {
       "omschrijving": "Fanta Cassis Krat 24 flesjes x 20 cl",
@@ -643,7 +733,10 @@
           "delta": 24,
           "bron": "2026-09-16"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "115994": {
       "omschrijving": "Fanta Orange Krat 24 flesjes x 20 cl",
@@ -663,7 +756,10 @@
           "delta": -7.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179682": {
       "omschrijving": "Fanta Orange Tray 24 blikjes x 33 cl",
@@ -695,7 +791,10 @@
           "delta": -0.4000000000000057,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "233033": {
       "omschrijving": "Fristi Fristi rood fruit minder suiker Krat 24 flesjes x 20 cl",
@@ -715,7 +814,10 @@
           "delta": 58,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179550": {
       "omschrijving": "Fristi rood fruit minder suiker Tray 24 blikjes x 25 cl",
@@ -741,7 +843,10 @@
           "delta": -0.3999999999999986,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "44609": {
       "omschrijving": "Fuze Tea Black ice tea peach hibiscus Krat 24 flesjes x 20 cl",
@@ -761,7 +866,10 @@
           "delta": -2.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "44608": {
       "omschrijving": "Fuze Tea Black ice tea sparkling lemon Krat 24 flesjes x 20 cl",
@@ -781,7 +889,10 @@
           "delta": -6.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179669": {
       "omschrijving": "Fuze Tea Black ice tea sparkling lemon Tray 24 blikjes x 33 cl",
@@ -813,7 +924,10 @@
           "delta": -0.4000000000000057,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "44613": {
       "omschrijving": "Fuze Tea Green ice tea Krat 24 flesjes x 20 cl",
@@ -839,7 +953,10 @@
           "delta": -11.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "99377": {
       "omschrijving": "HARIBO Balla red f!zz Doos 28 zakjes x 70 g",
@@ -853,7 +970,10 @@
           "delta": 3,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "98696": {
       "omschrijving": "HARIBO Fruitgom kikkers Doos 28 zakjes x 70 g",
@@ -867,7 +987,10 @@
           "delta": 0,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "98687": {
       "omschrijving": "HARIBO Goudberen Doos 28 zakjes x 75 g",
@@ -881,7 +1004,10 @@
           "delta": 56,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "98694": {
       "omschrijving": "HARIBO Happy cola Doos 28 zakjes x 75 g",
@@ -895,7 +1021,10 @@
           "delta": 32,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "98695": {
       "omschrijving": "HARIBO Happy peaches Doos 28 zakjes x 75 g",
@@ -909,7 +1038,10 @@
           "delta": 60,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "98705": {
       "omschrijving": "HARIBO Schuimpjes bananen Doos 28 zakjes x 70 g",
@@ -923,7 +1055,10 @@
           "delta": 25,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "98700": {
       "omschrijving": "HARIBO Starmix Doos 28 zakjes x 75 g",
@@ -937,7 +1072,10 @@
           "delta": 34,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "43255": {
       "omschrijving": "Heineken Pilsener 0.0% Krat 24 flesjes x 30 cl",
@@ -957,7 +1095,10 @@
           "delta": -1.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "190855": {
       "omschrijving": "Heineken Pilsener Star Bottle Krat 24 flesjes x 30 cl",
@@ -971,7 +1112,10 @@
           "delta": 48,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179385": {
       "omschrijving": "Hero Appelsap 100% Tray 24 blikjes x 25 cl",
@@ -985,7 +1129,10 @@
           "delta": 56,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "controleer",
+      "arrangement_alleen": false
     },
     "157530": {
       "omschrijving": "Hero B'tween Graanreep pinda's en melkchocolade Doos 24 wikkels x 50 g",
@@ -999,7 +1146,10 @@
           "delta": 1,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "973538": {
       "omschrijving": "Hero B'tween Melkchocolade big Doos 24 wikkels x 50 g",
@@ -1013,7 +1163,10 @@
           "delta": 24,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "81342": {
       "omschrijving": "Jimmy's Popcorn zoet minibag Doos 21 zakjes x 27 g",
@@ -1027,7 +1180,10 @@
           "delta": 65,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 21,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "143763": {
       "omschrijving": "Jimmy's Popcorn zout minibags Doos 21 zakjes x 17 g",
@@ -1047,7 +1203,10 @@
           "delta": -27.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 21,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "881883": {
       "omschrijving": "Lay's Flatchips Naturel gezouten chips Doos 20 zakjes x 40 g",
@@ -1067,7 +1226,10 @@
           "delta": 83,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "881891": {
       "omschrijving": "Lay's Flatchips Paprika chips Doos 20 zakjes x 40 g",
@@ -1087,7 +1249,10 @@
           "delta": 83,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "44266": {
       "omschrijving": "Liga Evergreen EverGreen koekjes krenten Doos 24 wikkels x 37,5 g",
@@ -1101,7 +1266,10 @@
           "delta": 0,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "470514": {
       "omschrijving": "M&M's Choco - melk chocolade snoepjes singles Doos 24 zakjes x 45 g",
@@ -1115,7 +1283,10 @@
           "delta": 75,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "198084": {
       "omschrijving": "M&M's Crispy - melk chocolade snoepjes singles Doos 24 zakjes x 36 g",
@@ -1129,7 +1300,10 @@
           "delta": 50,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "470255": {
       "omschrijving": "M&M's Pinda - melk chocolade snoepjes singles Doos 24 wikkels x 45 g",
@@ -1143,7 +1317,10 @@
           "delta": 50,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "195837": {
       "omschrijving": "Magnum Almond Doos 20 stuks x 11 cl",
@@ -1157,7 +1334,10 @@
           "delta": 45,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "208931": {
       "omschrijving": "Magnum Caramel  nuts bar Doos 30 wikkels x 6,4 cl",
@@ -1171,7 +1351,10 @@
           "delta": 35,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 30,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "195663": {
       "omschrijving": "Magnum Classic Doos 20 stuks x 11 cl",
@@ -1185,7 +1368,10 @@
           "delta": 53,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "226604": {
       "omschrijving": "Magnum Magnum peach Doos 20 stuks x 9 cl",
@@ -1199,7 +1385,10 @@
           "delta": 35,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "226600": {
       "omschrijving": "Magnum Magnum pistache Doos 20 stuks x 9 cl",
@@ -1213,7 +1402,10 @@
           "delta": 30,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "195665": {
       "omschrijving": "Magnum White chocolate Doos 20 stuks x 11 cl",
@@ -1227,7 +1419,10 @@
           "delta": 20,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "197562": {
       "omschrijving": "Mars Melk chocolade karamel repen singles Doos 32 wikkels x 51 g",
@@ -1241,7 +1436,10 @@
           "delta": 50,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 32,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "206382": {
       "omschrijving": "Oedipus Pais Tropical Tray 12 blikjes x 33 cl",
@@ -1255,7 +1453,10 @@
           "delta": 24,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 12,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "266127": {
       "omschrijving": "Ola Calippo Calippo cola Doos 24 stuks x 10,5 cl",
@@ -1269,7 +1470,10 @@
           "delta": 48,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "161567": {
       "omschrijving": "Ola Calippo Calippo orange Doos 24 stuks x 10,5 cl",
@@ -1283,7 +1487,10 @@
           "delta": 48,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "48388": {
       "omschrijving": "Ola Festini Peer Doos 45 stuks x 5 cl",
@@ -1297,7 +1504,10 @@
           "delta": 90,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 45,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "226991": {
       "omschrijving": "Ola Funny foot ijs Doos 25 stuks x 7,9 cl",
@@ -1311,7 +1521,10 @@
           "delta": 25,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 25,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "227989": {
       "omschrijving": "Ola Go mini's Doos 20 stuks x 7,3 cl",
@@ -1331,7 +1544,10 @@
           "delta": -7.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 20,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "226607": {
       "omschrijving": "Ola Ola Volcanix Doos 24 stuks x 8 cl",
@@ -1351,7 +1567,10 @@
           "delta": -3.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "125064": {
       "omschrijving": "Ola Raketijsjes Doos 5 pakken x 12 stuks",
@@ -1377,7 +1596,10 @@
           "delta": -11.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 60,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "188706": {
       "omschrijving": "Ola Schatkist ijs Doos 18 wikkels x 8 cl",
@@ -1403,7 +1625,10 @@
           "delta": -1.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 18,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "845175": {
       "omschrijving": "Ola Solero Solero exotic Doos 25 stuks x 9 cl",
@@ -1423,7 +1648,10 @@
           "delta": -1.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 25,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "219364": {
       "omschrijving": "Ola Split ijsje sinaas Doos 40 stuks x 6,7 cl",
@@ -1437,7 +1665,10 @@
           "delta": 47,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 40,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "245391": {
       "omschrijving": "Ola Super twister 28 stuks x 11 cl",
@@ -1457,7 +1688,10 @@
           "delta": -5.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 28,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "226608": {
       "omschrijving": "Ola Twister freezer Doos 35 stuks x 7 cl",
@@ -1477,7 +1711,10 @@
           "delta": -5.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 35,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "190886": {
       "omschrijving": "Royal Bliss Bitter lemon Krat 24 flesjes x 20 cl",
@@ -1497,7 +1734,10 @@
           "delta": -1,
           "bron": "bonnetjes na telling 13-09 (niet meegenomen in telling)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "195112": {
       "omschrijving": "Royal Bliss Ginger ale Krat 24 flesjes x 20 cl",
@@ -1511,7 +1751,10 @@
           "delta": 39,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "195115": {
       "omschrijving": "Royal Bliss Signature tonic water Krat 24 flesjes x 20 cl",
@@ -1531,7 +1774,10 @@
           "delta": -4.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "430158": {
       "omschrijving": "Schulp Appelsap Tray 15 flesjes x 20 cl",
@@ -1563,7 +1809,10 @@
           "delta": -12.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 15,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "892224": {
       "omschrijving": "Schulp Perensap Tray 15 flesjes x 20 cl",
@@ -1577,7 +1826,10 @@
           "delta": 30,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 15,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "197567": {
       "omschrijving": "Snickers Melk chocolade pinda repen singles Doos 32 wikkels x 50 g",
@@ -1591,7 +1843,10 @@
           "delta": 50,
           "bron": "fysieke telling 2026-09-13 (CSV Tim)"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 32,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "180496": {
       "omschrijving": "Sprite Zero sugar Krat 24 flesjes x 20 cl",
@@ -1617,7 +1872,10 @@
           "delta": 24,
           "bron": "2026-09-16"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "178574": {
       "omschrijving": "Texels Skuumkoppe 0.0% Krat 24 flesjes x 30 cl",
@@ -1637,7 +1895,10 @@
           "delta": -5.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179269": {
       "omschrijving": "Texels Skuumkoppe Krat 24 flesjes x 30 cl",
@@ -1663,7 +1924,10 @@
           "delta": -1.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "204020": {
       "omschrijving": "Twist and Drink Aardbei Tray 6 multipacks x 4 petflessen x 20 cl",
@@ -1683,7 +1947,10 @@
           "delta": -4.6,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "219519": {
       "omschrijving": "Twist and Drink Appel Tray 6 multipacks x 4 petflessen x 20 cl",
@@ -1703,7 +1970,10 @@
           "delta": -4.6,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "184541": {
       "omschrijving": "Twist and Drink Bosvruchten Tray 24 petflessen x 20 cl",
@@ -1723,7 +1993,10 @@
           "delta": -4.6,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "205555": {
       "omschrijving": "Twist and Drink Bubble gum Tray 6 multipacks x 4 petflessen x 20 cl",
@@ -1743,7 +2016,10 @@
           "delta": -4.6,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "184538": {
       "omschrijving": "Twist and Drink Framboos Tray 24 petflessen x 20 cl",
@@ -1763,7 +2039,10 @@
           "delta": -4.6,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "197576": {
       "omschrijving": "Twix Melk chocolade karamel repen singles Doos 25 wikkels x 50 g",
@@ -1783,7 +2062,10 @@
           "delta": -6.0,
           "bron": "2026-09-07 - 2026-09-14"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 25,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179687": {
       "omschrijving": "Fanta Cassis Tray 24 blikjes x 33 cl",
@@ -1821,7 +2103,10 @@
           "delta": -0.3999999999999986,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "180480": {
       "omschrijving": "Sprite Zero sugar Tray 24 blikjes x 33 cl",
@@ -1853,7 +2138,10 @@
           "delta": -0.3999999999999986,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     },
     "179673": {
       "omschrijving": "Fuze Tea Black ice tea peach hibiscus Tray 24 blikjes x 33 cl",
@@ -1891,7 +2179,10 @@
           "delta": -0.3999999999999986,
           "bron": "herstel: Blikje frisdrank take away evenredig verdeeld over 9 smaken i.p.v. 10 (Fuze Tea Green blikje bestaat niet), afgerond op hele stuks"
         }
-      ]
+      ],
+      "verpakkingsgrootte": 24,
+      "status": "zeker",
+      "arrangement_alleen": false
     }
   },
   "koppeltabel": [
@@ -4694,5 +4985,12 @@
         }
       ]
     }
-  ]
+  ],
+  "arrangementen": [],
+  "opties": [],
+  "boekingen": [],
+  "instellingen": {
+    "weken_vooruit": 2,
+    "buffer_pct": 0.15
+  }
 }

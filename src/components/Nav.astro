@@ -1,8 +1,15 @@
 ---
-import { Calculator, Link as LinkIcon, Package, TrendingUp, Truck } from "lucide-react";
+import {
+  Calculator,
+  Link as LinkIcon,
+  Package,
+  TrendingUp,
+  Truck,
+  UtensilsCrossed,
+} from "lucide-react";
 
 interface Props {
-  active: "voorraad" | "koppeltabel" | "bestellingen" | "trends" | "inkoopadvies";
+  active: "voorraad" | "koppeltabel" | "bestellingen" | "trends" | "arrangementen" | "inkoopadvies";
 }
 
 const { active } = Astro.props;
@@ -12,6 +19,7 @@ const items = [
   { key: "koppeltabel", href: "/koppeltabel/", label: "Koppeltabel", Icon: LinkIcon },
   { key: "bestellingen", href: "/bestellingen/", label: "Leveringen", Icon: Truck },
   { key: "trends", href: "/trends/", label: "Trends", Icon: TrendingUp },
+  { key: "arrangementen", href: "/arrangementen/", label: "Arrangementen", Icon: UtensilsCrossed },
   { key: "inkoopadvies", href: "/inkoopadvies/", label: "Inkoopadvies", Icon: Calculator },
 ] as const;
 ---
@@ -24,7 +32,7 @@ const items = [
   <span class="kicker text-[12px] text-text-on-dark">Sligro-voorraad · Pannenkoekhut</span>
 </header>
 
-<!-- Mobiel: onderste tabbalk, 5 iconen -->
+<!-- Mobiel: onderste tabbalk, 6 iconen -->
 <nav
   aria-label="Onderdelen"
   class="motion fixed inset-x-0 bottom-0 z-10 flex desktop:hidden h-16 items-stretch border-t border-border-light bg-white"
@@ -36,12 +44,12 @@ const items = [
         <a
           href={href}
           aria-current={isActive ? "page" : undefined}
-          class={`motion flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-semibold ${
+          class={`motion flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 text-center text-[9px] leading-tight font-semibold ${
             isActive ? "text-accent-ink" : "text-text-muted"
           }`}
         >
-          <Icon size={22} strokeWidth={2} color="currentColor" />
-          {label}
+          <Icon size={20} strokeWidth={2} color="currentColor" className="shrink-0" />
+          <span class="w-full truncate">{label}</span>
         </a>
       );
     })

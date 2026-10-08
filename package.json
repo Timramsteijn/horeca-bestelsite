@@ -15,9 +15,11 @@
     "@astrojs/cloudflare": "^14.3.2",
     "@astrojs/react": "^6.0.6",
     "astro": "^7.3.3",
+    "immer": "^11.1.21",
     "lucide-react": "^1.47.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

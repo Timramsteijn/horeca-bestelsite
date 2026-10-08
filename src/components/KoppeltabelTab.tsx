@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
-import type { KoppeltabelRow, KoppeltabelStatus } from "../types/sligro";
+import type { KoppeltabelStatus } from "../types/sligro";
 import { SearchInput } from "./SearchInput";
 import { EmptyState } from "./EmptyState";
 import { StatusBadge } from "./StatusBadge";
+import { useSligroData } from "../hooks/useSligroData";
+import { getKoppeltabel } from "../lib/data";
 
 const FILTERS: { key: KoppeltabelStatus | "alle"; label: string }[] = [
   { key: "alle", label: "Alle" },
@@ -12,9 +14,11 @@ const FILTERS: { key: KoppeltabelStatus | "alle"; label: string }[] = [
   { key: "nvt", label: "N.v.t." },
 ];
 
-export function KoppeltabelTab({ rows }: { rows: KoppeltabelRow[] }) {
+export function KoppeltabelTab() {
+  const data = useSligroData();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<KoppeltabelStatus | "alle">("alle");
+  const rows = useMemo(() => (data ? getKoppeltabel(data) : []), [data]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

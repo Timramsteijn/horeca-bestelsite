@@ -1,14 +1,14 @@
 ---
 import "../styles/globals.css";
 import Nav from "../components/Nav.astro";
+import { HeaderBar } from "../components/HeaderBar";
 
 interface Props {
   title: string;
-  active: "voorraad" | "koppeltabel" | "bestellingen" | "trends" | "inkoopadvies";
-  laatsteUpdate?: string;
+  active: "voorraad" | "koppeltabel" | "bestellingen" | "trends" | "arrangementen" | "inkoopadvies";
 }
 
-const { title, active, laatsteUpdate } = Astro.props;
+const { title, active } = Astro.props;
 ---
 
 <!doctype html>
@@ -34,18 +34,7 @@ const { title, active, laatsteUpdate } = Astro.props;
       <Nav active={active} />
 
       <div class="flex min-w-0 flex-1 flex-col pb-16 desktop:pb-0">
-        <header
-          class="hidden desktop:flex h-[66px] shrink-0 items-center justify-between border-b border-border-light bg-white px-6"
-        >
-          <h1 class="display text-[22px] leading-none text-ink">{title}</h1>
-          {
-            laatsteUpdate && (
-              <p class="kicker text-[11px] text-text-muted">
-                Data bijgewerkt: {laatsteUpdate}
-              </p>
-            )
-          }
-        </header>
+        <HeaderBar title={title} client:load />
 
         <main class="flex-1 px-[18px] py-5 desktop:px-6 desktop:py-6">
           <div class="mx-auto flex max-w-[1100px] flex-col gap-3.5">
