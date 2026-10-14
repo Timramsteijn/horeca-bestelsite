@@ -18,8 +18,14 @@ export interface InkoopadviesRegel {
   par_niveau: number;
   verpakkingen_nodig: number;
   buffer_verpakkingen: number;
+  // de automatisch berekende vaste voorraad (verpakkingen_nodig + buffer),
+  // altijd aanwezig als referentie ook als een seizoen-override actief is
+  vaste_voorraad_berekend_verpakkingen: number;
   vaste_voorraad_verpakkingen: number;
   vaste_voorraad_stuks: number;
+  // true als vaste_voorraad_verpakkingen uit een seizoen-override komt i.p.v.
+  // de automatische berekening
+  heeft_seizoen_override: boolean;
   benodigd_uit_arrangementen: number;
   streefvoorraad_stuks: number;
   huidige_voorraad: number;
@@ -47,6 +53,11 @@ export function berekenInkoopadvies(
   bufferOverrides: Record<string, number>,
   benodigdUitArrangementen: Record<string, number>,
   options: InkoopadviesOptions,
+  // handmatig ingesteld seizoen-doel (verpakkingen) per artikelnummer — komt
+  // in plaats van de automatisch berekende vaste voorraad, zie Seizoen in
+  // src/types/sligro.ts. Ontbreekt een artikel hierin, dan geldt de
+  // automatische berekening gewoon.
+  doelvoorraadOverrides?: Record<string, number>,
 ): InkoopadviesRegel[] {
   const wekenVooruit = options.wekenVooruit ?? DEFAULT_WEKEN_VOORUIT;
   const bufferPct = options.bufferPct ?? DEFAULT_BUFFER_PCT;
@@ -77,7 +88,12 @@ export function berekenInkoopadvies(
 
       // 4. Vaste voorraad (verpakkingen + stuks)
       const bufferVerpakkingen = bufferOverrides[item.artikelnummer] ?? DEFAULT_BUFFER_VERPAKKINGEN;
-      const vasteVoorraadVerpakkingen = verpakkingenNodig + bufferVerpakkingen;
+      const vasteVoorraadBerekendVerpakkingen = verpakkingenNodig + bufferVerpakkingen;
+      const seizoenOverride = doelvoorraadOverrides?.[item.artikelnummer];
+      const heeftSeizoenOverride = seizoenOverride !== undefined;
+      const vasteVoorraadVerpakkingen = heeftSeizoenOverride
+        ? seizoenOverride
+        : vasteVoorraadBerekendVerpakkingen;
       const vasteVoorraadStuks = vasteVoorraadVerpakkingen * item.verpakkingsgrootte;
 
       // 4b. + benodigd uit arrangementen (toekomstige boekingen binnen de
@@ -104,8 +120,10 @@ export function berekenInkoopadvies(
         par_niveau: parNiveau,
         verpakkingen_nodig: verpakkingenNodig,
         buffer_verpakkingen: bufferVerpakkingen,
+        vaste_voorraad_berekend_verpakkingen: vasteVoorraadBerekendVerpakkingen,
         vaste_voorraad_verpakkingen: vasteVoorraadVerpakkingen,
         vaste_voorraad_stuks: vasteVoorraadStuks,
+        heeft_seizoen_override: heeftSeizoenOverride,
         benodigd_uit_arrangementen: benodigdArrangementen,
         streefvoorraad_stuks: streefvoorraadStuks,
         huidige_voorraad: huidigeVoorraad,

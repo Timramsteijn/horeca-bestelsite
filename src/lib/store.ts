@@ -50,6 +50,10 @@ interface SligroStore {
   voegBoekingToe: (boeking: Omit<Boeking, "id">) => void;
   updateBoeking: (id: string, patch: Partial<Omit<Boeking, "id">>) => void;
   verwijderBoeking: (id: string) => void;
+
+  maakSeizoen: (naam: string, doelvoorraad: Record<string, number>) => string;
+  verwijderSeizoen: (id: string) => void;
+  setDoelvoorraad: (seizoenId: string, artikelnummer: string, verpakkingen: number) => void;
 }
 
 export const useSligroStore = create<SligroStore>()(
@@ -187,6 +191,26 @@ export const useSligroStore = create<SligroStore>()(
         set((state) => {
           if (!state.data) return;
           state.data.boekingen = state.data.boekingen.filter((x) => x.id !== id);
+        });
+      },
+
+      maakSeizoen: (naam, doelvoorraad) => {
+        const id = nieuwId();
+        set((state) => {
+          state.data?.seizoenen.push({ id, naam, doelvoorraad: { ...doelvoorraad } });
+        });
+        return id;
+      },
+      verwijderSeizoen: (id) => {
+        set((state) => {
+          if (!state.data) return;
+          state.data.seizoenen = state.data.seizoenen.filter((x) => x.id !== id);
+        });
+      },
+      setDoelvoorraad: (seizoenId, artikelnummer, verpakkingen) => {
+        set((state) => {
+          const seizoen = state.data?.seizoenen.find((x) => x.id === seizoenId);
+          if (seizoen) seizoen.doelvoorraad[artikelnummer] = verpakkingen;
         });
       },
     })),

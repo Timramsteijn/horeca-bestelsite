@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Minus, Plus, Printer, Download, X } from "lucide-react";
+import { Minus, Plus, Printer, Download, X, Trash2 } from "lucide-react";
 import {
   berekenInkoopadvies,
   DEFAULT_BUFFER_PCT,
@@ -9,6 +9,7 @@ import {
 import { berekenBenodigdUitArrangementen } from "../lib/arrangementen";
 import { EmptyState } from "./EmptyState";
 import { useSligroData } from "../hooks/useSligroData";
+import { useSligroStore } from "../lib/store";
 import { getVoorraadItems } from "../lib/data";
 import { downloadCsv } from "../lib/csv";
 import { buildSligroBestellingCsv, type BestellijstRegel } from "../lib/sligro-bestelling";
@@ -136,8 +137,25 @@ function WerkelijkeBestellingStepper({
   );
 }
 
+function DoelvoorraadInput({ waarde, onChange }: { waarde: number; onChange: (v: number) => void }) {
+  return (
+    <input
+      type="number"
+      min={0}
+      value={waarde}
+      onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+      className="w-16 rounded-[8px] border border-accent bg-accent-tint px-2 py-1 text-right text-[13px] text-accent-ink focus-visible:outline-2 focus-visible:outline-accent"
+    />
+  );
+}
+
 export function InkoopadviesTab() {
   const data = useSligroData();
+  const maakSeizoen = useSligroStore((s) => s.maakSeizoen);
+  const verwijderSeizoen = useSligroStore((s) => s.verwijderSeizoen);
+  const setDoelvoorraad = useSligroStore((s) => s.setDoelvoorraad);
+  const [actiefSeizoenId, setActiefSeizoenId] = useState<string | null>(null);
+  const [nieuwSeizoenNaam, setNieuwSeizoenNaam] = useState("");
   const periodes = data?.verkoop_periodes.periodes ?? [];
   const laatstePeriode = periodes.at(-1)?.label;
   const [selectedPeriodes, setSelectedPeriodes] = useState<string[]>(
@@ -177,6 +195,9 @@ export function InkoopadviesTab() {
     );
   }, [data, wekenVooruit]);
 
+  const seizoenen = data?.seizoenen ?? [];
+  const actiefSeizoen = seizoenen.find((s) => s.id === actiefSeizoenId) ?? null;
+
   const resultaat = useMemo(() => {
     if (!data) return [];
     return berekenInkoopadvies(
@@ -186,8 +207,33 @@ export function InkoopadviesTab() {
       data.buffer_overrides,
       benodigdUitArrangementen,
       { periodeLabels: selectedPeriodes, wekenVooruit, bufferPct: bufferPctInput / 100 },
+      actiefSeizoen?.doelvoorraad,
     );
-  }, [data, voorraadItems, periodes, benodigdUitArrangementen, selectedPeriodes, wekenVooruit, bufferPctInput]);
+  }, [
+    data,
+    voorraadItems,
+    periodes,
+    benodigdUitArrangementen,
+    selectedPeriodes,
+    wekenVooruit,
+    bufferPctInput,
+    actiefSeizoen,
+  ]);
+
+  function seizoenAanmaken() {
+    const naam = nieuwSeizoenNaam.trim();
+    if (!naam) return;
+    const snapshot: Record<string, number> = {};
+    for (const r of resultaat) snapshot[r.artikelnummer] = r.vaste_voorraad_verpakkingen;
+    const id = maakSeizoen(naam, snapshot);
+    setActiefSeizoenId(id);
+    setNieuwSeizoenNaam("");
+  }
+
+  function seizoenVerwijderen(id: string) {
+    verwijderSeizoen(id);
+    if (actiefSeizoenId === id) setActiefSeizoenId(null);
+  }
 
   function werkelijkeBestelling(r: InkoopadviesRegel): number {
     return werkelijkeOverrides[r.artikelnummer] ?? r.te_bestellen_verpakkingen;
@@ -279,6 +325,70 @@ export function InkoopadviesTab() {
         </div>
       </div>
 
+      <div className="flex flex-col gap-2 rounded-[10px] border border-border-light bg-white p-4 shadow-[var(--shadow-card)]">
+        <p className="kicker text-[11px] text-text-muted">
+          Vaste voorraad: automatisch berekend, of een seizoen met handmatig ingestelde aantallen
+        </p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setActiefSeizoenId(null)}
+            aria-pressed={actiefSeizoenId === null}
+            className={`motion kicker rounded-[999px] border px-3 py-1.5 text-[11px] ${
+              actiefSeizoenId === null
+                ? "border-accent bg-accent text-accent-on"
+                : "border-border-light bg-white text-text-medium hover:border-accent"
+            }`}
+          >
+            Automatisch
+          </button>
+          {seizoenen.map((s) => {
+            const isActive = s.id === actiefSeizoenId;
+            return (
+              <span
+                key={s.id}
+                className={`motion kicker inline-flex items-center gap-1 rounded-[999px] border pl-3 pr-1.5 py-1.5 text-[11px] ${
+                  isActive
+                    ? "border-accent bg-accent text-accent-on"
+                    : "border-border-light bg-white text-text-medium hover:border-accent"
+                }`}
+              >
+                <button type="button" onClick={() => setActiefSeizoenId(s.id)}>
+                  {s.naam}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => seizoenVerwijderen(s.id)}
+                  aria-label={`Seizoen ${s.naam} verwijderen`}
+                  className={`motion flex h-5 w-5 items-center justify-center rounded-[999px] ${
+                    isActive ? "hover:bg-accent-pressed" : "hover:bg-amber-tint hover:text-amber-text"
+                  }`}
+                >
+                  <Trash2 size={12} strokeWidth={2} />
+                </button>
+              </span>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <input
+            type="text"
+            value={nieuwSeizoenNaam}
+            onChange={(e) => setNieuwSeizoenNaam(e.target.value)}
+            placeholder="Naam nieuw seizoen, bv. Winter"
+            className="w-56 rounded-[8px] border border-border-light bg-white px-3 py-1.5 text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-accent"
+          />
+          <button
+            type="button"
+            disabled={!nieuwSeizoenNaam.trim()}
+            onClick={seizoenAanmaken}
+            className="motion kicker rounded-[999px] border border-border-light bg-white px-3 py-1.5 text-[11px] text-text-medium hover:border-accent disabled:opacity-45"
+          >
+            Seizoen aanmaken (vanuit huidige aantallen)
+          </button>
+        </div>
+      </div>
+
       {selectedPeriodes.length === 0 ? (
         <EmptyState message="Selecteer minimaal één periode om een advies te berekenen." />
       ) : (
@@ -304,7 +414,9 @@ export function InkoopadviesTab() {
                   <th className="kicker px-3 py-2.5 text-[10px] text-text-muted">Sligro-nr.</th>
                   <th className="kicker px-3 py-2.5 text-right text-[10px] text-text-muted">Gem./week</th>
                   <th className="kicker px-3 py-2.5 text-right text-[10px] text-text-muted">Par-niveau</th>
-                  <th className="kicker px-3 py-2.5 text-right text-[10px] text-text-muted">Vaste voorraad</th>
+                  <th className="kicker px-3 py-2.5 text-right text-[10px] text-text-muted">
+                    Vaste voorraad{actiefSeizoen ? ` (${actiefSeizoen.naam})` : ""}
+                  </th>
                   <th className="kicker px-3 py-2.5 text-right text-[10px] text-text-muted">
                     Arrangementen (extra)
                   </th>
@@ -324,7 +436,19 @@ export function InkoopadviesTab() {
                     <td className="px-3 py-2 text-right text-ink">{r.gem_verkoop_per_week.toFixed(1)}</td>
                     <td className="px-3 py-2 text-right text-ink">{r.par_niveau}</td>
                     <td className="px-3 py-2 text-right text-ink">
-                      {r.vaste_voorraad_verpakkingen} / {r.vaste_voorraad_stuks}
+                      {actiefSeizoen ? (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <DoelvoorraadInput
+                            waarde={r.vaste_voorraad_verpakkingen}
+                            onChange={(v) => setDoelvoorraad(actiefSeizoen.id, r.artikelnummer, v)}
+                          />
+                          <span className="text-text-muted">/ {r.vaste_voorraad_stuks}</span>
+                        </div>
+                      ) : (
+                        <>
+                          {r.vaste_voorraad_verpakkingen} / {r.vaste_voorraad_stuks}
+                        </>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-right text-ink">
                       {r.benodigd_uit_arrangementen > 0 ? `+${r.benodigd_uit_arrangementen}` : "—"}

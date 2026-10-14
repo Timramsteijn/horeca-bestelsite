@@ -191,4 +191,39 @@ describe("berekenInkoopadvies — regels", () => {
     expect(metArrangementen.streefvoorraad_stuks).toBe(zonderArrangementen.streefvoorraad_stuks + 50);
     expect(metArrangementen.tekort).toBe(zonderArrangementen.tekort + 50);
   });
+
+  it("gebruikt een seizoen-override i.p.v. de berekende vaste voorraad, indien aanwezig", () => {
+    const zonderOverride = berekenInkoopadvies(voorraadItems, verkoopPerArtikel, periodes, {}, {}, {
+      periodeLabels: ["week-1", "week-2"],
+    })[0];
+    expect(zonderOverride.heeft_seizoen_override).toBe(false);
+
+    const metOverride = berekenInkoopadvies(
+      voorraadItems,
+      verkoopPerArtikel,
+      periodes,
+      {},
+      {},
+      { periodeLabels: ["week-1", "week-2"] },
+      { "1": 100 },
+    )[0];
+    expect(metOverride.heeft_seizoen_override).toBe(true);
+    expect(metOverride.vaste_voorraad_verpakkingen).toBe(100);
+    expect(metOverride.vaste_voorraad_stuks).toBe(100 * metOverride.verpakkingsgrootte);
+    // de berekende waarde blijft zichtbaar als referentie
+    expect(metOverride.vaste_voorraad_berekend_verpakkingen).toBe(zonderOverride.vaste_voorraad_verpakkingen);
+  });
+
+  it("valt terug op de automatische berekening voor artikelen die niet in de override-map staan", () => {
+    const resultaat = berekenInkoopadvies(
+      voorraadItems,
+      verkoopPerArtikel,
+      periodes,
+      {},
+      {},
+      { periodeLabels: ["week-1", "week-2"] },
+      { "999999": 5 }, // ander artikelnummer, niet "1"
+    )[0];
+    expect(resultaat.heeft_seizoen_override).toBe(false);
+  });
 });

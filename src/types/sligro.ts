@@ -104,6 +104,18 @@ export interface Instellingen {
   buffer_pct: number;
 }
 
+// Een seizoen is een handmatig ingestelde "vaste voorraad" (in verpakkingen)
+// per artikel, als alternatief voor de automatisch berekende par-niveau —
+// voor producten die per seizoen structureel meer/minder verkopen dan het
+// gemiddelde van de geselecteerde verkoopperiodes laat zien. Ontbreekt een
+// artikel in doelvoorraad (bv. nieuw artikel na het aanmaken van het
+// seizoen), dan valt de berekening terug op de automatische waarde.
+export interface Seizoen {
+  id: string;
+  naam: string;
+  doelvoorraad: Record<string, number>;
+}
+
 export interface SligroData {
   gegenereerd_op: string;
   voorraad: Record<string, Omit<VoorraadItem, "artikelnummer">>;
@@ -118,4 +130,5 @@ export interface SligroData {
   opties: Optie[];
   boekingen: Boeking[];
   instellingen: Instellingen;
+  seizoenen: Seizoen[];
 }

@@ -4992,5 +4992,6 @@
   "instellingen": {
     "weken_vooruit": 2,
     "buffer_pct": 0.15
-  }
+  },
+  "seizoenen": []
 }

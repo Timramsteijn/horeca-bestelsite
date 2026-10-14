@@ -59,7 +59,7 @@ localStorage als persistentielaag, niet een database. Dat betekent:
 | **Leveringen** | Kaart per bestelling/levering | Alleen-lezen; leveringen komen binnen via de Lightspeed-importknop of worden handmatig toegevoegd aan de brondata |
 | **Trends** | Verkoop per periode per artikel (sluit `arrangement_alleen`-artikelen uit) | Alleen-lezen; nieuwe kolom verschijnt automatisch na een Lightspeed-import |
 | **Arrangementen** *(nieuw)* | Boekingen + sjablonen (arrangementen) + extra opties | Volledige CRUD |
-| **Inkoopadvies** | Rekenmodule + "werkelijke bestelling"-kolom + bestellijst-modal | Werkelijke-bestelling-override, bestellijst genereren (print/CSV) |
+| **Inkoopadvies** | Rekenmodule + seizoenen + "werkelijke bestelling"-kolom + bestellijst-modal | Seizoenen aanmaken/bewerken/verwijderen, werkelijke-bestelling-override, bestellijst genereren (print/CSV) |
 
 Overal zichtbaar: **"Verkopen importeren"**-knop (CSV-upload van een Lightspeed
 PRODUCT SUMMARY REPORT) in de header, en een "Data bijgewerkt"-indicator.
@@ -80,6 +80,16 @@ nodig → vaste voorraad met buffer-overrides → tekort → te bestellen), met 
 2. **+ "benodigd uit arrangementen"** (`src/lib/arrangementen.ts`): de som van toekomstige
    boekingen (binnen de "weken vooruit"-horizon) wordt bovenop de vaste voorraad opgeteld
    vóórdat het tekort berekend wordt.
+3. **Optionele seizoen-override**: omdat de verkoop van sommige producten sterk per seizoen
+   verschilt (en het gemiddelde over gekozen periodes dat niet altijd goed vangt), kun je in de
+   Inkoopadvies-tab een "seizoen" aanmaken — een momentopname van de huidige vaste-voorraad-
+   aantallen (in verpakkingen) per artikel, die je daarna los van de automatische berekening
+   handmatig kunt bijstellen. Zodra een seizoen actief is, vervangt die handmatige waarde
+   `vaste_voorraad_verpakkingen` in de formule (de automatisch berekende waarde blijft als
+   referentie zichtbaar via `vaste_voorraad_berekend_verpakkingen`); "benodigd uit
+   arrangementen" en de rest van de formule blijven ongewijzigd bovenop komen. Seizoenen worden
+   per artikelnummer opgeslagen, dus nieuwe artikelen die na het aanmaken van een seizoen worden
+   toegevoegd vallen gewoon terug op de automatische berekening totdat je ze expliciet instelt.
 
 ### Arrangementen (`src/lib/arrangementen.ts`)
 
