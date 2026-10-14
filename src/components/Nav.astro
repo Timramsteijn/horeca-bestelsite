@@ -14,14 +14,19 @@ interface Props {
 
 const { active } = Astro.props;
 
-const items = [
+// "Koppeltabel" is instelwerk (de Lightspeed↔Sligro-koppeling), geen
+// dagelijkse taak — staat daarom apart onderaan, onder "Beheer".
+const dagelijks = [
   { key: "voorraad", href: "/", label: "Voorraad", Icon: Package },
-  { key: "koppeltabel", href: "/koppeltabel/", label: "Koppeltabel", Icon: LinkIcon },
   { key: "bestellingen", href: "/bestellingen/", label: "Leveringen", Icon: Truck },
   { key: "trends", href: "/trends/", label: "Trends", Icon: TrendingUp },
   { key: "arrangementen", href: "/arrangementen/", label: "Arrangementen", Icon: UtensilsCrossed },
   { key: "inkoopadvies", href: "/inkoopadvies/", label: "Inkoopadvies", Icon: Calculator },
 ] as const;
+
+const beheer = [{ key: "koppeltabel", href: "/koppeltabel/", label: "Koppeltabel", Icon: LinkIcon }] as const;
+
+const items = [...dagelijks, ...beheer];
 ---
 
 <!-- Mobiel: navy topbalk met logo + titel -->
@@ -66,7 +71,7 @@ const items = [
   </div>
   <nav aria-label="Onderdelen" class="flex flex-col gap-1">
     {
-      items.map(({ key, href, label, Icon }) => {
+      dagelijks.map(({ key, href, label, Icon }) => {
         const isActive = key === active;
         return (
           <a
@@ -84,5 +89,28 @@ const items = [
         );
       })
     }
+
+    <div class="mt-3 border-t border-border-dark pt-3">
+      <p class="kicker px-3 pb-1.5 text-[10px] text-text-on-dark">Beheer</p>
+      {
+        beheer.map(({ key, href, label, Icon }) => {
+          const isActive = key === active;
+          return (
+            <a
+              href={href}
+              aria-current={isActive ? "page" : undefined}
+              class={`motion flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-[14px] font-semibold ${
+                isActive
+                  ? "bg-navy-light text-creme"
+                  : "text-text-on-dark hover:bg-navy-light hover:text-creme"
+              }`}
+            >
+              <Icon size={20} strokeWidth={2} color="currentColor" />
+              {label}
+            </a>
+          );
+        })
+      }
+    </div>
   </nav>
 </aside>
