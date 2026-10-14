@@ -5,7 +5,15 @@ import { HeaderBar } from "../components/HeaderBar";
 
 interface Props {
   title: string;
-  active: "voorraad" | "koppeltabel" | "bestellingen" | "trends" | "arrangementen" | "inkoopadvies";
+  active:
+    | "voorraad"
+    | "koppeltabel"
+    | "bestellingen"
+    | "trends"
+    | "arrangementen"
+    | "inkoopadvies"
+    | "seizoenen"
+    | "beheer";
 }
 
 const { title, active } = Astro.props;

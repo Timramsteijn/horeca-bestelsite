@@ -1,0 +1,43 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Leaf, Link as LinkIcon } from "lucide-react";
+
+const links = [
+  {
+    href: "/koppeltabel/",
+    label: "Koppeltabel",
+    omschrijving: "Lightspeed ↔ Sligro-koppeling bekijken.",
+    Icon: LinkIcon,
+  },
+  {
+    href: "/seizoenen/",
+    label: "Seizoenen",
+    omschrijving: "Vaste voorraad per seizoen instellen, activeren en bewerken.",
+    Icon: Leaf,
+  },
+];
+---
+
+<Layout title="Beheer" active="beheer">
+  <div class="flex flex-col gap-3">
+    <p class="kicker text-[11px] text-text-muted">
+      Instelwerk, geen dagelijkse taak — zie hieronder de beheer-onderdelen.
+    </p>
+    {
+      links.map(({ href, label, omschrijving, Icon }) => (
+        <a
+          href={href}
+          class="motion flex items-center gap-3 rounded-[10px] border border-border-light bg-white p-4 shadow-[var(--shadow-card)] hover:border-accent"
+        >
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[999px] bg-zand/60 text-text-medium">
+            <Icon size={20} strokeWidth={2} />
+          </span>
+          <span class="flex flex-col">
+            <span class="text-[14px] font-semibold text-ink">{label}</span>
+            <span class="text-[12px] text-text-muted">{omschrijving}</span>
+          </span>
+        </a>
+      ))
+    }
+  </div>
+</Layout>

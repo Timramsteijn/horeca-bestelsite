@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Minus, Plus, Printer, Download, X, Trash2 } from "lucide-react";
+import { Minus, Plus, Printer, Download, X, Settings2 } from "lucide-react";
 import {
   berekenInkoopadvies,
   DEFAULT_BUFFER_PCT,
@@ -151,11 +151,9 @@ function DoelvoorraadInput({ waarde, onChange }: { waarde: number; onChange: (v:
 
 export function InkoopadviesTab() {
   const data = useSligroData();
-  const maakSeizoen = useSligroStore((s) => s.maakSeizoen);
-  const verwijderSeizoen = useSligroStore((s) => s.verwijderSeizoen);
   const setDoelvoorraad = useSligroStore((s) => s.setDoelvoorraad);
-  const [actiefSeizoenId, setActiefSeizoenId] = useState<string | null>(null);
-  const [nieuwSeizoenNaam, setNieuwSeizoenNaam] = useState("");
+  const activeerSeizoen = useSligroStore((s) => s.activeerSeizoen);
+  const actiefSeizoenId = data?.actief_seizoen_id ?? null;
   const periodes = data?.verkoop_periodes.periodes ?? [];
   const laatstePeriode = periodes.at(-1)?.label;
   const [selectedPeriodes, setSelectedPeriodes] = useState<string[]>(
@@ -219,21 +217,6 @@ export function InkoopadviesTab() {
     bufferPctInput,
     actiefSeizoen,
   ]);
-
-  function seizoenAanmaken() {
-    const naam = nieuwSeizoenNaam.trim();
-    if (!naam) return;
-    const snapshot: Record<string, number> = {};
-    for (const r of resultaat) snapshot[r.artikelnummer] = r.vaste_voorraad_verpakkingen;
-    const id = maakSeizoen(naam, snapshot);
-    setActiefSeizoenId(id);
-    setNieuwSeizoenNaam("");
-  }
-
-  function seizoenVerwijderen(id: string) {
-    verwijderSeizoen(id);
-    if (actiefSeizoenId === id) setActiefSeizoenId(null);
-  }
 
   function werkelijkeBestelling(r: InkoopadviesRegel): number {
     return werkelijkeOverrides[r.artikelnummer] ?? r.te_bestellen_verpakkingen;
@@ -326,13 +309,22 @@ export function InkoopadviesTab() {
       </div>
 
       <div className="flex flex-col gap-2 rounded-[10px] border border-border-light bg-white p-4 shadow-[var(--shadow-card)]">
-        <p className="kicker text-[11px] text-text-muted">
-          Vaste voorraad: automatisch berekend, of een seizoen met handmatig ingestelde aantallen
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="kicker text-[11px] text-text-muted">
+            Vaste voorraad: automatisch berekend, of een seizoen met handmatig ingestelde aantallen
+          </p>
+          <a
+            href="/seizoenen/"
+            className="motion kicker inline-flex items-center gap-1.5 rounded-[999px] border border-border-light bg-white px-3 py-1.5 text-[11px] text-text-medium hover:border-accent"
+          >
+            <Settings2 size={14} strokeWidth={2} />
+            Seizoenen beheren
+          </a>
+        </div>
         <div className="flex flex-wrap items-center gap-1.5">
           <button
             type="button"
-            onClick={() => setActiefSeizoenId(null)}
+            onClick={() => activeerSeizoen(null)}
             aria-pressed={actiefSeizoenId === null}
             className={`motion kicker rounded-[999px] border px-3 py-1.5 text-[11px] ${
               actiefSeizoenId === null
@@ -345,47 +337,21 @@ export function InkoopadviesTab() {
           {seizoenen.map((s) => {
             const isActive = s.id === actiefSeizoenId;
             return (
-              <span
+              <button
                 key={s.id}
-                className={`motion kicker inline-flex items-center gap-1 rounded-[999px] border pl-3 pr-1.5 py-1.5 text-[11px] ${
+                type="button"
+                onClick={() => activeerSeizoen(s.id)}
+                aria-pressed={isActive}
+                className={`motion kicker rounded-[999px] border px-3 py-1.5 text-[11px] ${
                   isActive
                     ? "border-accent bg-accent text-accent-on"
                     : "border-border-light bg-white text-text-medium hover:border-accent"
                 }`}
               >
-                <button type="button" onClick={() => setActiefSeizoenId(s.id)}>
-                  {s.naam}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => seizoenVerwijderen(s.id)}
-                  aria-label={`Seizoen ${s.naam} verwijderen`}
-                  className={`motion flex h-5 w-5 items-center justify-center rounded-[999px] ${
-                    isActive ? "hover:bg-accent-pressed" : "hover:bg-amber-tint hover:text-amber-text"
-                  }`}
-                >
-                  <Trash2 size={12} strokeWidth={2} />
-                </button>
-              </span>
+                {s.naam}
+              </button>
             );
           })}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <input
-            type="text"
-            value={nieuwSeizoenNaam}
-            onChange={(e) => setNieuwSeizoenNaam(e.target.value)}
-            placeholder="Naam nieuw seizoen, bv. Winter"
-            className="w-56 rounded-[8px] border border-border-light bg-white px-3 py-1.5 text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-accent"
-          />
-          <button
-            type="button"
-            disabled={!nieuwSeizoenNaam.trim()}
-            onClick={seizoenAanmaken}
-            className="motion kicker rounded-[999px] border border-border-light bg-white px-3 py-1.5 text-[11px] text-text-medium hover:border-accent disabled:opacity-45"
-          >
-            Seizoen aanmaken (vanuit huidige aantallen)
-          </button>
         </div>
       </div>
 

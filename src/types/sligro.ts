@@ -131,4 +131,8 @@ export interface SligroData {
   boekingen: Boeking[];
   instellingen: Instellingen;
   seizoenen: Seizoen[];
+  // null = Inkoopadvies gebruikt de automatische berekening; anders het id
+  // van het actieve seizoen (zie Seizoen hierboven). Hoort bij de store, niet
+  // bij lokale component-state, zodat de keuze een herlaad overleeft.
+  actief_seizoen_id: string | null;
 }

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { DEFAULT_BUFFER_PCT, DEFAULT_WEKEN_VOORUIT } from "./inkoopadvies";
 import type {
   Arrangement,
   Boeking,
@@ -19,6 +20,19 @@ const SEED_URL = "/data/sligro-data.json";
 
 function nieuwId(): string {
   return crypto.randomUUID();
+}
+
+// Backfill voor lokaal opgeslagen data van vóór een schema-uitbreiding: wie
+// de site al gebruikte voordat bv. "seizoenen" bestond, heeft dat veld niet
+// in zijn localStorage-snapshot staan. Zonder dit loopt elke actie die zo'n
+// veld aanspreekt stil vast (bv. "Seizoen aanmaken" doet dan niets zichtbaars).
+function vulOntbrekendeVeldenAan(data: SligroData): void {
+  data.arrangementen ??= [];
+  data.opties ??= [];
+  data.boekingen ??= [];
+  data.seizoenen ??= [];
+  data.instellingen ??= { weken_vooruit: DEFAULT_WEKEN_VOORUIT, buffer_pct: DEFAULT_BUFFER_PCT };
+  data.actief_seizoen_id ??= null;
 }
 
 interface SligroStore {
@@ -52,8 +66,10 @@ interface SligroStore {
   verwijderBoeking: (id: string) => void;
 
   maakSeizoen: (naam: string, doelvoorraad: Record<string, number>) => string;
+  updateSeizoen: (id: string, patch: { naam?: string }) => void;
   verwijderSeizoen: (id: string) => void;
   setDoelvoorraad: (seizoenId: string, artikelnummer: string, verpakkingen: number) => void;
+  activeerSeizoen: (id: string | null) => void;
 }
 
 export const useSligroStore = create<SligroStore>()(
@@ -62,10 +78,19 @@ export const useSligroStore = create<SligroStore>()(
       data: null,
 
       laden: async () => {
-        if (get().data) return;
+        if (get().data) {
+          // Al geladen (vers geseed of gerehydrateerd uit localStorage) —
+          // vul alsnog ontbrekende velden aan voor wie de site al gebruikte
+          // vóórdat die velden bestonden.
+          set((state) => {
+            if (state.data) vulOntbrekendeVeldenAan(state.data);
+          });
+          return;
+        }
         const res = await fetch(SEED_URL);
         if (!res.ok) throw new Error(`Kon data niet laden: HTTP ${res.status}`);
         const seed = (await res.json()) as SligroData;
+        vulOntbrekendeVeldenAan(seed);
         set((state) => {
           state.data = seed;
         });
@@ -201,16 +226,29 @@ export const useSligroStore = create<SligroStore>()(
         });
         return id;
       },
+      updateSeizoen: (id, patch) => {
+        set((state) => {
+          const seizoen = state.data?.seizoenen.find((x) => x.id === id);
+          if (seizoen) Object.assign(seizoen, patch);
+        });
+      },
       verwijderSeizoen: (id) => {
         set((state) => {
           if (!state.data) return;
           state.data.seizoenen = state.data.seizoenen.filter((x) => x.id !== id);
+          if (state.data.actief_seizoen_id === id) state.data.actief_seizoen_id = null;
         });
       },
       setDoelvoorraad: (seizoenId, artikelnummer, verpakkingen) => {
         set((state) => {
           const seizoen = state.data?.seizoenen.find((x) => x.id === seizoenId);
           if (seizoen) seizoen.doelvoorraad[artikelnummer] = verpakkingen;
+        });
+      },
+      activeerSeizoen: (id) => {
+        set((state) => {
+          if (!state.data) return;
+          state.data.actief_seizoen_id = id;
         });
       },
     })),

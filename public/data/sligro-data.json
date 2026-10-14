@@ -4993,5 +4993,6 @@
     "weken_vooruit": 2,
     "buffer_pct": 0.15
   },
-  "seizoenen": []
+  "seizoenen": [],
+  "actief_seizoen_id": null
 }

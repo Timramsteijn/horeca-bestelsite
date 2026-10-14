@@ -49,6 +49,12 @@ localStorage als persistentielaag, niet een database. Dat betekent:
   seed wordt maar één keer gebruikt, bij een lege localStorage. Wil je de lokale staat
   terugzetten naar de meegeleverde data: leeg de site-data van deze pagina in de browser
   (devtools → Application → Local Storage, of gewoon de browsergeschiedenis/site-data wissen).
+- **Schema-migratie voor bestaande gebruikers**: als het datamodel een nieuw top-level veld
+  krijgt (zoals `seizoenen`), vult `laden()` in `src/lib/store.ts` dat alsnog aan met een
+  standaardwaarde voor wie al lokale data had van vóór die toevoeging. Zonder dit zou een actie
+  die zo'n ontbrekend veld aanspreekt (bv. een seizoen aanmaken) stil vastlopen — zichtbaar
+  als "de knop doet niets" — omdat `persist` de oude (onvolledige) staat uit localStorage
+  rehydrateert nog vóórdat `laden()` draait.
 
 ## De zes onderdelen
 
@@ -59,7 +65,8 @@ localStorage als persistentielaag, niet een database. Dat betekent:
 | **Leveringen** | Kaart per bestelling/levering | Alleen-lezen; leveringen komen binnen via de Lightspeed-importknop of worden handmatig toegevoegd aan de brondata |
 | **Trends** | Verkoop per periode per artikel (sluit `arrangement_alleen`-artikelen uit) | Alleen-lezen; nieuwe kolom verschijnt automatisch na een Lightspeed-import |
 | **Arrangementen** *(nieuw)* | Boekingen + sjablonen (arrangementen) + extra opties | Volledige CRUD |
-| **Inkoopadvies** | Rekenmodule + seizoenen + "werkelijke bestelling"-kolom + bestellijst-modal | Seizoenen aanmaken/bewerken/verwijderen, werkelijke-bestelling-override, bestellijst genereren (print/CSV) |
+| **Inkoopadvies** | Rekenmodule + seizoenkiezer + "werkelijke bestelling"-kolom + bestellijst-modal | Seizoen activeren/deactiveren, werkelijke-bestelling-override, bestellijst genereren (print/CSV) |
+| **Beheer → Seizoenen** *(nieuw)* | Per seizoen: naam, doelvoorraad per artikel | Seizoenen aanmaken/hernoemen/verwijderen, activeren, én bewerken — ook als het niet het actieve seizoen is |
 
 Overal zichtbaar: **"Verkopen importeren"**-knop (CSV-upload van een Lightspeed
 PRODUCT SUMMARY REPORT) in de header, en een "Data bijgewerkt"-indicator.
@@ -81,10 +88,13 @@ nodig → vaste voorraad met buffer-overrides → tekort → te bestellen), met 
    boekingen (binnen de "weken vooruit"-horizon) wordt bovenop de vaste voorraad opgeteld
    vóórdat het tekort berekend wordt.
 3. **Optionele seizoen-override**: omdat de verkoop van sommige producten sterk per seizoen
-   verschilt (en het gemiddelde over gekozen periodes dat niet altijd goed vangt), kun je in de
-   Inkoopadvies-tab een "seizoen" aanmaken — een momentopname van de huidige vaste-voorraad-
-   aantallen (in verpakkingen) per artikel, die je daarna los van de automatische berekening
-   handmatig kunt bijstellen. Zodra een seizoen actief is, vervangt die handmatige waarde
+   verschilt (en het gemiddelde over gekozen periodes dat niet altijd goed vangt), kun je onder
+   **Beheer → Seizoenen** een "seizoen" aanmaken — gestart vanuit de automatische berekening,
+   maar daarna los daarvan handmatig bij te stellen per artikel, en altijd bewerkbaar, ook als
+   het niet het actieve seizoen is. Welk seizoen (of "Automatisch") voor Inkoopadvies geldt,
+   activeer je op diezelfde Beheer-pagina of met de snelle kiezer bovenaan de Inkoopadvies-tab
+   zelf — die keuze wordt in de store bewaard (`actief_seizoen_id`) en overleeft dus een
+   herlaad. Zodra een seizoen actief is, vervangt die handmatige waarde
    `vaste_voorraad_verpakkingen` in de formule (de automatisch berekende waarde blijft als
    referentie zichtbaar via `vaste_voorraad_berekend_verpakkingen`); "benodigd uit
    arrangementen" en de rest van de formule blijven ongewijzigd bovenop komen. Seizoenen worden
