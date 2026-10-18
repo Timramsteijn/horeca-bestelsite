@@ -8,7 +8,7 @@ import {
   vindOngematchteProducten,
   type RecrasMatchRegel,
 } from "../lib/recras-import";
-import type { Arrangement } from "../types/sligro";
+import type { Arrangement, ArrangementStatus } from "../types/sligro";
 
 // Zolang er geen live koppeling met RECRAS is, levert Tim periodiek een
 // export van het rapport "Geboekte producten" aan (xlsx). Die bevat per
@@ -17,12 +17,27 @@ import type { Arrangement } from "../types/sligro";
 // dat bestand in de browser in (read-excel-file i.p.v. het populairdere
 // "xlsx"-pakket, dat onopgeloste prototype-pollution/ReDoS-kwetsbaarheden
 // heeft — zie package.json), matcht de productnamen aan bestaande
-// productsjablonen, en laat Tim in een review-stap kiezen welke onbekende
-// producten als nieuw sjabloon aangemaakt moeten worden vóór het importeren.
+// productsjablonen, en laat Tim in een review-stap per onbekend product
+// kiezen wat ermee moet gebeuren (zie Keuze hieronder) — niet alles wordt
+// klakkeloos als nieuw sjabloon aangemaakt, want niet elk RECRAS-"product"
+// is iets om Sligro-spullen voor te bestellen (bv. zaalhuur, een
+// reservering, een regel als "eigen taart meenemen").
 
 const VEREISTE_KOLOMMEN = ["Boeking", "Product", "Begindatum", "Aantal", "Status"];
 
 type Stap = "upload" | "beoordelen" | "klaar";
+
+// overslaan = niets aanmaken, regel blijft "nog niet gekoppeld" in de
+// boekingenlijst; sjabloon = nieuw productsjabloon (status "controleer",
+// Sligro-verbruik vul je later in); nvt = nieuw sjabloon met status "nvt"
+// (telt nooit mee, maar voorkomt dat een volgende import er opnieuw om vraagt).
+type Keuze = "overslaan" | "sjabloon" | "nvt";
+
+const KEUZE_LABEL: Record<Keuze, string> = {
+  overslaan: "Overslaan (nog niet beslissen)",
+  sjabloon: "Nieuw sjabloon — moet nog ingevuld",
+  nvt: "N.v.t. — hoort niet bij bestellen",
+};
 
 export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement[] }) {
   const maakArrangementenBulk = useSligroStore((s) => s.maakArrangementenBulk);
@@ -34,7 +49,7 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
   const [bezig, setBezig] = useState(false);
   const [fout, setFout] = useState<string | null>(null);
   const [regels, setRegels] = useState<RecrasMatchRegel[]>([]);
-  const [nieuweNamen, setNieuweNamen] = useState<Set<string>>(new Set());
+  const [keuzes, setKeuzes] = useState<Record<string, Keuze>>({});
   const [resultaatTekst, setResultaatTekst] = useState<string | null>(null);
 
   function sluiten() {
@@ -43,7 +58,7 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
     setBezig(false);
     setFout(null);
     setRegels([]);
-    setNieuweNamen(new Set());
+    setKeuzes({});
     setResultaatTekst(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -76,7 +91,9 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
       }
       const gematcht = matchRecrasRegels(parsed, arrangementen);
       setRegels(gematcht);
-      setNieuweNamen(new Set(vindOngematchteProducten(gematcht)));
+      const nieuweKeuzes: Record<string, Keuze> = {};
+      for (const naam of vindOngematchteProducten(gematcht)) nieuweKeuzes[naam] = "overslaan";
+      setKeuzes(nieuweKeuzes);
       setStap("beoordelen");
     } catch (e) {
       setFout(e instanceof Error ? e.message : "Onbekende fout bij het lezen van het bestand.");
@@ -85,17 +102,19 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
     }
   }
 
-  function toggleNieuweNaam(naam: string) {
-    setNieuweNamen((huidig) => {
-      const volgende = new Set(huidig);
-      if (volgende.has(naam)) volgende.delete(naam);
-      else volgende.add(naam);
+  function zetKeuzeVoorAllen(keuze: Keuze) {
+    setKeuzes((huidig) => {
+      const volgende: Record<string, Keuze> = {};
+      for (const naam of Object.keys(huidig)) volgende[naam] = keuze;
       return volgende;
     });
   }
 
   function bevestigen() {
-    maakArrangementenBulk(Array.from(nieuweNamen));
+    const nieuweSjablonen = Object.entries(keuzes)
+      .filter(([, keuze]) => keuze !== "overslaan")
+      .map(([naam, keuze]) => ({ naam, status: (keuze === "nvt" ? "nvt" : "controleer") as ArrangementStatus }));
+    maakArrangementenBulk(nieuweSjablonen);
     // De zojuist aangemaakte sjablonen moeten ook meteen als match gelden —
     // simpelst door de volledige, bijgewerkte arrangementenlijst uit de
     // store te halen en opnieuw (dezelfde matchlogica) te matchen, i.p.v.
@@ -107,12 +126,17 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
     const aantalBoekingen = new Set(definitief.map((r) => r.recras_boeking)).size;
     const perStatus = { definitief: 0, optie: 0, voltooid: 0 };
     for (const r of definitief) perStatus[r.status]++;
+    const aantalSjabloon = nieuweSjablonen.filter((n) => n.status === "controleer").length;
+    const aantalNvt = nieuweSjablonen.filter((n) => n.status === "nvt").length;
+    const aantalOvergeslagen = Object.values(keuzes).filter((k) => k === "overslaan").length;
+    const extra: string[] = [];
+    if (aantalSjabloon > 0) extra.push(`${aantalSjabloon} nieuwe sjablonen aangemaakt (status "controleer")`);
+    if (aantalNvt > 0) extra.push(`${aantalNvt} gemarkeerd als n.v.t.`);
+    if (aantalOvergeslagen > 0) extra.push(`${aantalOvergeslagen} producten overgeslagen (nog niet gekoppeld)`);
     setResultaatTekst(
       `${definitief.length} productregels geïmporteerd uit ${aantalBoekingen} boekingen ` +
         `(${perStatus.definitief} definitief, ${perStatus.optie} optie, ${perStatus.voltooid} voltooid).` +
-        (nieuweNamen.size > 0
-          ? ` ${nieuweNamen.size} nieuwe productsjablonen aangemaakt (status "controleer" — vul het Sligro-verbruik in).`
-          : ""),
+        (extra.length > 0 ? ` ${extra.join(", ")}.` : ""),
     );
     setStap("klaar");
   }
@@ -140,7 +164,7 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
 
       {open && (
         <div className="fixed inset-0 z-20 flex items-start justify-center overflow-y-auto bg-ink/40 p-4">
-          <div className="flex w-full max-w-[640px] flex-col gap-4 rounded-[18px] bg-white p-5 shadow-[var(--shadow-hover)]">
+          <div className="flex w-full max-w-[720px] flex-col gap-4 rounded-[18px] bg-white p-5 shadow-[var(--shadow-hover)]">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="display text-[20px] text-ink">Boekingen importeren uit RECRAS</h2>
@@ -188,20 +212,50 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
                 {ongematchteNamen.length > 0 ? (
                   <div className="flex flex-col gap-2 rounded-[10px] border border-border-light bg-zand/30 p-3">
                     <p className="kicker text-[11px] text-text-muted">
-                      {ongematchteNamen.length} productnamen hebben nog geen sjabloon. Vink aan welke je nu als nieuw
-                      sjabloon wilt aanmaken (status "controleer", Sligro-verbruik vul je daarna in) — laat uit als je
-                      ze later handmatig aan een bestaand sjabloon koppelt.
+                      {ongematchteNamen.length} productnamen hebben nog geen sjabloon. Kies per product: wordt dit
+                      iets om Sligro-spullen voor te bestellen (nieuw sjabloon), of hoort het daar niet bij (bv.
+                      zaalhuur, een reservering — n.v.t.)? Laat op "overslaan" staan om nu niets te doen; de regel
+                      blijft dan als "nog niet gekoppeld" in de boekingenlijst staan.
                     </p>
-                    <div className="flex max-h-[220px] flex-col gap-1 overflow-y-auto">
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => zetKeuzeVoorAllen("overslaan")}
+                        className="motion kicker rounded-[999px] border border-border-light bg-white px-2.5 py-1 text-[10px] text-text-medium hover:border-accent"
+                      >
+                        Alles op overslaan
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => zetKeuzeVoorAllen("sjabloon")}
+                        className="motion kicker rounded-[999px] border border-border-light bg-white px-2.5 py-1 text-[10px] text-text-medium hover:border-accent"
+                      >
+                        Alles op nieuw sjabloon
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => zetKeuzeVoorAllen("nvt")}
+                        className="motion kicker rounded-[999px] border border-border-light bg-white px-2.5 py-1 text-[10px] text-text-medium hover:border-accent"
+                      >
+                        Alles op n.v.t.
+                      </button>
+                    </div>
+                    <div className="flex max-h-[280px] flex-col gap-1 overflow-y-auto">
                       {ongematchteNamen.map((naam) => (
-                        <label key={naam} className="flex items-center gap-2 text-[13px] text-ink">
-                          <input
-                            type="checkbox"
-                            checked={nieuweNamen.has(naam)}
-                            onChange={() => toggleNieuweNaam(naam)}
-                          />
-                          {naam}
-                        </label>
+                        <div key={naam} className="flex flex-wrap items-center justify-between gap-2 py-0.5">
+                          <span className="text-[13px] text-ink">{naam}</span>
+                          <select
+                            value={keuzes[naam] ?? "overslaan"}
+                            onChange={(e) => setKeuzes((h) => ({ ...h, [naam]: e.target.value as Keuze }))}
+                            className="rounded-[8px] border border-border-light bg-white px-2 py-1 text-[12px] text-ink"
+                          >
+                            {(Object.keys(KEUZE_LABEL) as Keuze[]).map((k) => (
+                              <option key={k} value={k}>
+                                {KEUZE_LABEL[k]}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       ))}
                     </div>
                   </div>

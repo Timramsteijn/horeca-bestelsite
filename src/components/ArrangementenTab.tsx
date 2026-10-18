@@ -9,7 +9,7 @@ import {
   samenvatBoekingConsumptie,
   type BoekingStatus,
 } from "../lib/arrangementen";
-import type { Arrangement, Boeking } from "../types/sligro";
+import type { Arrangement, ArrangementStatus, Boeking } from "../types/sligro";
 import { RecrasImportKnop } from "./RecrasImportKnop";
 import { formatDate } from "../lib/format";
 
@@ -26,6 +26,23 @@ const HORIZON_CLASS: Record<BoekingStatus, string> = {
   geweest: "bg-neutral-fill text-text-muted",
   telt_mee: "bg-green-tint text-green-text",
   later: "bg-keuring-tint text-keuring-text",
+};
+
+const STATUS_OPTIES: ArrangementStatus[] = ["zeker", "controleer", "nvt"];
+const STATUS_LABEL_KORT: Record<ArrangementStatus, string> = {
+  zeker: "Zeker",
+  controleer: "Controleer",
+  nvt: "N.v.t.",
+};
+const STATUS_ACTIVE_CLASS: Record<ArrangementStatus, string> = {
+  zeker: "bg-green-tint text-green-text",
+  controleer: "bg-amber-tint text-amber-text",
+  nvt: "bg-neutral-fill text-text-medium",
+};
+const STATUS_UITLEG: Record<ArrangementStatus, string> = {
+  zeker: "Telt mee in het inkoopadvies",
+  controleer: "Sligro-verbruik nog invullen — telt nog niet mee",
+  nvt: "Hoort niet bij bestellen — telt nooit mee",
 };
 
 const RECRAS_STATUS_LABEL: Record<Boeking["status"], string> = {
@@ -431,15 +448,24 @@ function ArrangementKaart({
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={() => updateArrangement(arrangement.id, { status: arrangement.status === "zeker" ? "controleer" : "zeker" })}
-        className={`motion kicker w-fit rounded-[999px] px-2.5 py-1 text-[10px] ${
-          arrangement.status === "zeker" ? "bg-green-tint text-green-text" : "bg-amber-tint text-amber-text"
-        }`}
-      >
-        {arrangement.status === "zeker" ? "Zeker — telt mee in advies" : "Controleer — telt nog niet mee"}
-      </button>
+      <div className="flex flex-wrap gap-1">
+        {STATUS_OPTIES.map((status) => (
+          <button
+            key={status}
+            type="button"
+            onClick={() => updateArrangement(arrangement.id, { status })}
+            aria-pressed={arrangement.status === status}
+            className={`motion kicker rounded-[999px] px-2.5 py-1 text-[10px] ${
+              arrangement.status === status
+                ? STATUS_ACTIVE_CLASS[status]
+                : "bg-navy-light text-text-on-dark hover:bg-border-dark"
+            }`}
+          >
+            {STATUS_LABEL_KORT[status]}
+          </button>
+        ))}
+      </div>
+      <p className="kicker text-[10px] text-text-on-dark">{STATUS_UITLEG[arrangement.status]}</p>
 
       <div className="flex flex-col gap-2">
         {arrangement.items.map((item, i) => (
@@ -516,12 +542,23 @@ function NieuwArrangementKaart() {
   );
 }
 
+const FILTER_OPTIES: (ArrangementStatus | "alles")[] = ["alles", "zeker", "controleer", "nvt"];
+const FILTER_LABEL: Record<ArrangementStatus | "alles", string> = {
+  alles: "Alles",
+  zeker: "Zeker",
+  controleer: "Controleer",
+  nvt: "N.v.t.",
+};
+
 export function ArrangementenTab() {
   const data = useSligroData();
   const arrangementen = data?.arrangementen ?? [];
   const boekingen = data?.boekingen ?? [];
   const voorraad = data?.voorraad ?? {};
   const instellingen = data?.instellingen;
+  const [filter, setFilter] = useState<ArrangementStatus | "alles">("alles");
+
+  const gefilterd = filter === "alles" ? arrangementen : arrangementen.filter((a) => a.status === filter);
 
   if (!data || !instellingen) return <EmptyState message="Data laden…" />;
 
@@ -533,13 +570,34 @@ export function ArrangementenTab() {
         <h2 className="display text-[20px] text-ink">Productsjablonen</h2>
         <p className="text-[12px] text-text-muted">
           Eén sjabloon per boekbaar RECRAS-product, met het Sligro-verbruik per persoon. De naam moet exact
-          overeenkomen met de productnaam in RECRAS om bij een import automatisch gekoppeld te worden.
+          overeenkomen met de productnaam in RECRAS om bij een import automatisch gekoppeld te worden. Niet elk
+          RECRAS-"product" is iets om Sligro-spullen voor te bestellen — zet zulke producten op "N.v.t.".
         </p>
+        <div className="flex flex-wrap gap-1.5">
+          {FILTER_OPTIES.map((optie) => {
+            const aantal = optie === "alles" ? arrangementen.length : arrangementen.filter((a) => a.status === optie).length;
+            return (
+              <button
+                key={optie}
+                type="button"
+                onClick={() => setFilter(optie)}
+                aria-pressed={filter === optie}
+                className={`motion kicker rounded-[999px] border px-3 py-1.5 text-[11px] ${
+                  filter === optie
+                    ? "border-accent bg-accent text-accent-on"
+                    : "border-border-light bg-white text-text-medium hover:border-accent"
+                }`}
+              >
+                {FILTER_LABEL[optie]} ({aantal})
+              </button>
+            );
+          })}
+        </div>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
-          {arrangementen.map((a) => (
+          {gefilterd.map((a) => (
             <ArrangementKaart key={a.id} arrangement={a} voorraad={voorraad} />
           ))}
-          <NieuwArrangementKaart />
+          {filter === "alles" && <NieuwArrangementKaart />}
         </div>
       </div>
     </div>

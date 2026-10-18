@@ -35,7 +35,7 @@ gebouwd is en de keuzes die daarbij gemaakt zijn.
   van die problemen.
 - **Vitest**: rekenregels (`src/lib/inkoopadvies.ts`, `src/lib/arrangementen.ts`,
   `src/lib/recras-import.ts`) en CSV/Lightspeed-parsing (`src/lib/csv.ts`, `src/lib/telsheet.ts`,
-  `src/lib/lightspeed-import.ts`), 53 tests.
+  `src/lib/lightspeed-import.ts`), 54 tests.
 
 ## Architectuur: client-side state, geen server/database
 
@@ -115,7 +115,7 @@ Eén boeking is gekoppeld aan precies één productsjabloon (`Arrangement`): ver
 sjabloon-items × `aantal_personen`. Telt alleen mee in "benodigd uit arrangementen" (en dus in
 het inkoopadvies) als (a) de boeking `status === "definitief"` is, (b) de boeking binnen de
 "weken vooruit"-horizon valt, én (c) het gekoppelde sjabloon zelf op status "zeker" staat (niet
-"controleer"). Zie `test/arrangementen.test.ts`.
+"controleer" of "nvt" — zie hieronder). Zie `test/arrangementen.test.ts`.
 
 > **Afwijking van een eerdere iteratie**: hiervóór bestond er een aparte "Optie"-entiteit met een
 > `vervangt`-mechanisme, bedoeld om bv. 4 halal + 2 glutenvrij + 34 regulier tot 40 personen op te
@@ -140,9 +140,18 @@ hoofd/sub-structuur. De "Boekingen importeren (RECRAS)"-knop op de Arrangementen
 2. Matcht elke regel aan een bestaand productsjabloon **op exacte naam** (na trim/lowercase —
    `matchRecrasRegels`). Geen fuzzy matching: RECRAS-productnamen zijn vrije tekst, en een verkeerde
    automatische koppeling is duurder dan een gemiste.
-3. Toont een review-stap met de aantallen per status en een lijst ongematchte productnamen; voor
-   elke kun je aanvinken of er nu een nieuw sjabloon voor aangemaakt moet worden (status
-   "controleer", Sligro-verbruik vul je daarna handmatig in op de sjabloonkaart).
+3. Toont een review-stap met de aantallen per status en een lijst ongematchte productnamen. Per
+   product kies je expliciet wat ermee moet gebeuren (standaard: "overslaan", **niets wordt
+   automatisch aangemaakt**):
+   - **Overslaan** — doe nu niets; de regel komt als "nog niet gekoppeld" in de boekingenlijst te
+     staan, met een select om 'm later alsnog te koppelen.
+   - **Nieuw sjabloon** — status "controleer", Sligro-verbruik per persoon vul je daarna in op de
+     sjabloonkaart.
+   - **N.v.t.** — voor RECRAS-"producten" die geen Sligro-verbruik hebben (zaalhuur, een
+     reservering, "neem eigen taart mee"): maakt het sjabloon meteen aan met status "nvt", zodat
+     een volgende import er niet opnieuw naar vraagt, maar het telt nooit mee.
+
+   Bulk-knoppen ("Alles op …") zetten alle ongematchte producten in één keer op dezelfde keuze.
 4. Bij bevestigen vervangt de import **alle eerder via RECRAS geïmporteerde boekingen** (een
    verse, volledige momentopname) — handmatig toegevoegde boekingen (`bron: "handmatig"`) blijven
    staan. Boekingen zonder (of met een nog niet op "zeker" gezet) sjabloon tellen gewoon mee in de
@@ -150,7 +159,9 @@ hoofd/sub-structuur. De "Boekingen importeren (RECRAS)"-knop op de Arrangementen
 
 Alleen boekingen met status "definitief" tellen mee in het inkoopadvies (zie hierboven);
 "optie"/"voltooid" staan wel in de lijst, ter info. Elke productregel toont een select om het
-gekoppelde sjabloon te wijzigen — ook nuttig als de automatische naam-match een keer fout zit.
+gekoppelde sjabloon te wijzigen — ook nuttig als de automatische naam-match een keer fout zit. De
+Productsjablonen-grid heeft filterpills (Alles/Zeker/Controleer/N.v.t.) zodat een lange lijst
+sjablonen overzichtelijk blijft.
 
 ## CSV-formaten
 

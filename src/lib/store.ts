@@ -4,6 +4,7 @@ import { immer } from "zustand/middleware/immer";
 import { DEFAULT_BUFFER_PCT, DEFAULT_WEKEN_VOORUIT } from "./inkoopadvies";
 import type {
   Arrangement,
+  ArrangementStatus,
   Boeking,
   SligroData,
 } from "../types/sligro";
@@ -53,7 +54,7 @@ interface SligroStore {
   ) => void;
 
   maakArrangement: (naam: string) => string;
-  maakArrangementenBulk: (namen: string[]) => Record<string, string>;
+  maakArrangementenBulk: (entries: { naam: string; status: ArrangementStatus }[]) => Record<string, string>;
   updateArrangement: (id: string, patch: Partial<Omit<Arrangement, "id">>) => void;
   verwijderArrangement: (id: string) => void;
 
@@ -161,14 +162,14 @@ export const useSligroStore = create<SligroStore>()(
         });
         return id;
       },
-      maakArrangementenBulk: (namen) => {
+      maakArrangementenBulk: (entries) => {
         const idPerNaam: Record<string, string> = {};
         set((state) => {
           if (!state.data) return;
-          for (const naam of namen) {
+          for (const { naam, status } of entries) {
             const id = nieuwId();
             idPerNaam[naam] = id;
-            state.data.arrangementen.push({ id, naam, items: [], status: "controleer" });
+            state.data.arrangementen.push({ id, naam, items: [], status });
           }
         });
         return idPerNaam;

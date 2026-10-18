@@ -70,19 +70,24 @@ export interface ArrangementItem {
   per_persoon: number;
 }
 
+// "controleer" = net aangemaakt (bv. automatisch bij import) en nog zonder
+// of met onvolledig Sligro-verbruik — telt niet mee in het inkoopadvies
+// totdat je 'm op "zeker" zet. "nvt" = een RECRAS-product dat geen Sligro-
+// verbruik heeft (zaalhuur, een reservering, een regel als "eigen taart
+// meenemen") — blijft bestaan zodat een volgende import er niet opnieuw om
+// vraagt, maar telt nooit mee.
+export type ArrangementStatus = "zeker" | "controleer" | "nvt";
+
 // Eén herbruikbaar, boekbaar product (vóór deze iteratie gesplitst in
 // Arrangement + Optie — dat onderscheid is losgelaten omdat RECRAS zelf geen
 // hoofd/sub-structuur levert, alleen een platte lijst producten per boeking,
 // zie Boeking en src/lib/recras-import.ts). "naam" is ook de matchsleutel bij
-// het importeren van een RECRAS-export. status: "controleer" = net
-// aangemaakt (bv. automatisch bij import) en nog zonder of met onvolledig
-// Sligro-verbruik; telt daardoor niet mee in het inkoopadvies totdat je 'm
-// op "zeker" zet.
+// het importeren van een RECRAS-export.
 export interface Arrangement {
   id: string;
   naam: string;
   items: ArrangementItem[];
-  status: ArtikelStatus;
+  status: ArrangementStatus;
 }
 
 // Eén geboekte productregel. Komt ofwel uit een RECRAS "Geboekte producten"-

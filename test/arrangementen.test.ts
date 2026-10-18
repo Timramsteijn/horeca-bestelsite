@@ -107,4 +107,13 @@ describe("berekenBenodigdUitArrangementen", () => {
     const resultaat = berekenBenodigdUitArrangementen(boekingen, [nogControleren], "2026-02-01", 2);
     expect(resultaat).toEqual({});
   });
+
+  it("telt een boeking met een 'nvt'-sjabloon nooit mee (hoort niet bij bestellen)", () => {
+    const nietVanToepassing: Arrangement = { ...bbq, id: "zaalhuur", status: "nvt" };
+    const boekingen: Boeking[] = [
+      maakBoeking({ id: "a", arrangement_id: "zaalhuur", datum: "2026-02-05", aantal_personen: 20 }),
+    ];
+    const resultaat = berekenBenodigdUitArrangementen(boekingen, [nietVanToepassing], "2026-02-01", 2);
+    expect(resultaat).toEqual({});
+  });
 });
