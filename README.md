@@ -35,7 +35,7 @@ gebouwd is en de keuzes die daarbij gemaakt zijn.
   van die problemen.
 - **Vitest**: rekenregels (`src/lib/inkoopadvies.ts`, `src/lib/arrangementen.ts`,
   `src/lib/recras-import.ts`) en CSV/Lightspeed-parsing (`src/lib/csv.ts`, `src/lib/telsheet.ts`,
-  `src/lib/lightspeed-import.ts`), 54 tests.
+  `src/lib/lightspeed-import.ts`), 55 tests.
 
 ## Architectuur: client-side state, geen server/database
 
@@ -140,9 +140,12 @@ hoofd/sub-structuur. De "Boekingen importeren (RECRAS)"-knop op de Arrangementen
 2. Matcht elke regel aan een bestaand productsjabloon **op exacte naam** (na trim/lowercase —
    `matchRecrasRegels`). Geen fuzzy matching: RECRAS-productnamen zijn vrije tekst, en een verkeerde
    automatische koppeling is duurder dan een gemiste.
-3. Toont een review-stap met de aantallen per status en een lijst ongematchte productnamen. Per
-   product kies je expliciet wat ermee moet gebeuren (standaard: "overslaan", **niets wordt
-   automatisch aangemaakt**):
+3. Toont een review-stap met de aantallen per status en een lijst ongematchte productnamen, **geturfd**
+   (`telPerProductnaam`): hoe vaak en voor hoeveel personen elk product in deze export voorkomt,
+   vaakst-voorkomend bovenaan — zo zie je vóór het kiezen al of een product de moeite waard is om
+   een sjabloon voor in te richten, i.p.v. daar pas achteraf achter te komen. Per product kies je
+   expliciet wat ermee moet gebeuren (standaard: "overslaan", **niets wordt automatisch
+   aangemaakt**):
    - **Overslaan** — doe nu niets; de regel komt als "nog niet gekoppeld" in de boekingenlijst te
      staan, met een select om 'm later alsnog te koppelen.
    - **Nieuw sjabloon** — status "controleer", Sligro-verbruik per persoon vul je daarna in op de
@@ -160,8 +163,10 @@ hoofd/sub-structuur. De "Boekingen importeren (RECRAS)"-knop op de Arrangementen
 Alleen boekingen met status "definitief" tellen mee in het inkoopadvies (zie hierboven);
 "optie"/"voltooid" staan wel in de lijst, ter info. Elke productregel toont een select om het
 gekoppelde sjabloon te wijzigen — ook nuttig als de automatische naam-match een keer fout zit. De
-Productsjablonen-grid heeft filterpills (Alles/Zeker/Controleer/N.v.t.) zodat een lange lijst
-sjablonen overzichtelijk blijft.
+Productsjablonen-grid heeft filterpills (Alles/Zeker/Controleer/N.v.t.) en toont dezelfde tally
+(hoe vaak/voor hoeveel personen geboekt, over alle huidige boekingen heen) per kaart, vaakst
+gebruikte sjabloon bovenaan — zodat een lange lijst overzichtelijk blijft en duidelijk is waar het
+invullen van Sligro-verbruik het eerst loont.
 
 ## CSV-formaten
 

@@ -4,7 +4,9 @@ import { Upload, X } from "lucide-react";
 import { useSligroStore } from "../lib/store";
 import {
   matchRecrasRegels,
+  normaliseerProductnaam,
   parseRecrasRijen,
+  telPerProductnaam,
   vindOngematchteProducten,
   type RecrasMatchRegel,
 } from "../lib/recras-import";
@@ -149,7 +151,14 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
     { definitief: 0, optie: 0, voltooid: 0 },
   );
   const aantalBoekingenPreview = new Set(regels.map((r) => r.recras_boeking)).size;
-  const ongematchteNamen = vindOngematchteProducten(regels);
+  const tally = telPerProductnaam(regels);
+  // Vaakst voorkomende (dus waarschijnlijk belangrijkste) producten bovenaan
+  // — zo zie je bij het kiezen meteen of een sjabloon de moeite waard is.
+  const ongematchteNamen = [...vindOngematchteProducten(regels)].sort((a, b) => {
+    const tA = tally.get(normaliseerProductnaam(a))?.aantalRegels ?? 0;
+    const tB = tally.get(normaliseerProductnaam(b))?.aantalRegels ?? 0;
+    return tB - tA;
+  });
 
   return (
     <>
@@ -241,9 +250,18 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
                       </button>
                     </div>
                     <div className="flex max-h-[280px] flex-col gap-1 overflow-y-auto">
-                      {ongematchteNamen.map((naam) => (
+                      {ongematchteNamen.map((naam) => {
+                        const t = tally.get(normaliseerProductnaam(naam));
+                        return (
                         <div key={naam} className="flex flex-wrap items-center justify-between gap-2 py-0.5">
-                          <span className="text-[13px] text-ink">{naam}</span>
+                          <span className="text-[13px] text-ink">
+                            {naam}
+                            {t && (
+                              <span className="ml-1.5 text-[11px] text-text-muted">
+                                ({t.aantalRegels}× · {t.aantalPersonen} pers.)
+                              </span>
+                            )}
+                          </span>
                           <select
                             value={keuzes[naam] ?? "overslaan"}
                             onChange={(e) => setKeuzes((h) => ({ ...h, [naam]: e.target.value as Keuze }))}
@@ -256,7 +274,8 @@ export function RecrasImportKnop({ arrangementen }: { arrangementen: Arrangement
                             ))}
                           </select>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ) : (

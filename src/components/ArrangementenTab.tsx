@@ -391,9 +391,11 @@ function ArtikelKiezer({
 function ArrangementKaart({
   arrangement,
   voorraad,
+  tally,
 }: {
   arrangement: Arrangement;
   voorraad: Record<string, { omschrijving: string }>;
+  tally: { aantalBoekingen: number; aantalPersonen: number } | undefined;
 }) {
   const updateArrangement = useSligroStore((s) => s.updateArrangement);
   const verwijderArrangement = useSligroStore((s) => s.verwijderArrangement);
@@ -436,7 +438,12 @@ function ArrangementKaart({
               {arrangement.naam}
             </button>
           )}
-          <p className="kicker text-[10px] text-text-on-dark">Per persoon</p>
+          <p className="kicker text-[10px] text-text-on-dark">
+            Per persoon
+            {tally && tally.aantalBoekingen > 0 && (
+              <> · {tally.aantalBoekingen}× geboekt, {tally.aantalPersonen} personen</>
+            )}
+          </p>
         </div>
         <button
           type="button"
@@ -558,7 +565,23 @@ export function ArrangementenTab() {
   const instellingen = data?.instellingen;
   const [filter, setFilter] = useState<ArrangementStatus | "alles">("alles");
 
-  const gefilterd = filter === "alles" ? arrangementen : arrangementen.filter((a) => a.status === filter);
+  const tallyPerArrangement = useMemo(() => {
+    const tally = new Map<string, { aantalBoekingen: number; aantalPersonen: number }>();
+    for (const b of boekingen) {
+      if (!b.arrangement_id) continue;
+      const bestaand = tally.get(b.arrangement_id) ?? { aantalBoekingen: 0, aantalPersonen: 0 };
+      bestaand.aantalBoekingen += 1;
+      bestaand.aantalPersonen += b.aantal_personen;
+      tally.set(b.arrangement_id, bestaand);
+    }
+    return tally;
+  }, [boekingen]);
+
+  // Meest gebruikte sjablonen bovenaan — zo zie je in één oogopslag welke
+  // het meest de moeite waard zijn om het Sligro-verbruik voor in te vullen.
+  const gefilterd = (filter === "alles" ? arrangementen : arrangementen.filter((a) => a.status === filter))
+    .slice()
+    .sort((a, b) => (tallyPerArrangement.get(b.id)?.aantalBoekingen ?? 0) - (tallyPerArrangement.get(a.id)?.aantalBoekingen ?? 0));
 
   if (!data || !instellingen) return <EmptyState message="Data laden…" />;
 
@@ -595,7 +618,7 @@ export function ArrangementenTab() {
         </div>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
           {gefilterd.map((a) => (
-            <ArrangementKaart key={a.id} arrangement={a} voorraad={voorraad} />
+            <ArrangementKaart key={a.id} arrangement={a} voorraad={voorraad} tally={tallyPerArrangement.get(a.id)} />
           ))}
           {filter === "alles" && <NieuwArrangementKaart />}
         </div>

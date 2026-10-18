@@ -20,7 +20,7 @@ export interface RecrasMatchRegel extends RecrasRegel {
   arrangement_id: string | null;
 }
 
-function normaliseerNaam(naam: string): string {
+export function normaliseerProductnaam(naam: string): string {
   return naam.trim().toLowerCase();
 }
 
@@ -77,10 +77,10 @@ export function parseRecrasRijen(rijen: Record<string, unknown>[]): RecrasRegel[
  * trim/lowercase) — RECRAS-productnamen zijn verder vrije tekst, dus meer
  * fuzzy matchen voegt vooral risico op foute koppelingen toe. */
 export function matchRecrasRegels(regels: RecrasRegel[], arrangementen: Arrangement[]): RecrasMatchRegel[] {
-  const perNaam = new Map(arrangementen.map((a) => [normaliseerNaam(a.naam), a.id]));
+  const perNaam = new Map(arrangementen.map((a) => [normaliseerProductnaam(a.naam), a.id]));
   return regels.map((regel) => ({
     ...regel,
-    arrangement_id: perNaam.get(normaliseerNaam(regel.product_naam)) ?? null,
+    arrangement_id: perNaam.get(normaliseerProductnaam(regel.product_naam)) ?? null,
   }));
 }
 
@@ -92,10 +92,37 @@ export function vindOngematchteProducten(regels: RecrasMatchRegel[]): string[] {
   const resultaat: string[] = [];
   for (const r of regels) {
     if (r.arrangement_id !== null) continue;
-    const key = normaliseerNaam(r.product_naam);
+    const key = normaliseerProductnaam(r.product_naam);
     if (gezien.has(key)) continue;
     gezien.add(key);
     resultaat.push(r.product_naam);
   }
   return resultaat;
+}
+
+export interface ProductTally {
+  naam: string;
+  aantalRegels: number;
+  aantalPersonen: number;
+}
+
+/** Telt, per unieke productnaam, hoeveel regels en hoeveel personen er in
+ * totaal voorkomen in de import — gebruikt om in de review-stap en op de
+ * sjabloonkaarten te laten zien hoe vaak een product voorkomt ("geturfd"),
+ * zodat je kunt inschatten of het de moeite waard is om er een sjabloon
+ * voor in te richten vóórdat je dat werk doet, i.p.v. achteraf te ontdekken
+ * dat een product maar één keer voorkwam. */
+export function telPerProductnaam(regels: RecrasRegel[]): Map<string, ProductTally> {
+  const tally = new Map<string, ProductTally>();
+  for (const r of regels) {
+    const key = normaliseerProductnaam(r.product_naam);
+    const bestaand = tally.get(key);
+    if (bestaand) {
+      bestaand.aantalRegels += 1;
+      bestaand.aantalPersonen += r.aantal;
+    } else {
+      tally.set(key, { naam: r.product_naam, aantalRegels: 1, aantalPersonen: r.aantal });
+    }
+  }
+  return tally;
 }

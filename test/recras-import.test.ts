@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   matchRecrasRegels,
   parseRecrasRijen,
+  telPerProductnaam,
   vindOngematchteProducten,
   type RecrasRegel,
 } from "../src/lib/recras-import";
@@ -103,5 +104,47 @@ describe("matchRecrasRegels + vindOngematchteProducten", () => {
   it("geeft elke ongematchte productnaam één keer terug, in volgorde van eerste voorkomen", () => {
     const resultaat = matchRecrasRegels(regels, arrangementen);
     expect(vindOngematchteProducten(resultaat)).toEqual(["WGW Barbecue buffet"]);
+  });
+});
+
+describe("telPerProductnaam", () => {
+  it("telt het aantal regels en de som van 'aantal' per unieke (genormaliseerde) productnaam", () => {
+    const regels: RecrasRegel[] = [
+      {
+        recras_boeking: "1",
+        product_naam: "WGW Barbecue buffet",
+        aantal: 10,
+        datum: "2026-10-27",
+        boekingsnaam: "Feest",
+        status: "definitief",
+      },
+      {
+        recras_boeking: "2",
+        product_naam: "wgw barbecue buffet  ",
+        aantal: 5,
+        datum: "2026-10-28",
+        boekingsnaam: "Teamdag",
+        status: "optie",
+      },
+      {
+        recras_boeking: "3",
+        product_naam: "Eenmalig product",
+        aantal: 3,
+        datum: "2026-10-29",
+        boekingsnaam: "Borrel",
+        status: "definitief",
+      },
+    ];
+    const tally = telPerProductnaam(regels);
+    expect(tally.get("wgw barbecue buffet")).toEqual({
+      naam: "WGW Barbecue buffet",
+      aantalRegels: 2,
+      aantalPersonen: 15,
+    });
+    expect(tally.get("eenmalig product")).toEqual({
+      naam: "Eenmalig product",
+      aantalRegels: 1,
+      aantalPersonen: 3,
+    });
   });
 });
