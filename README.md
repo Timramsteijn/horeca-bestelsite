@@ -160,6 +160,10 @@ hoofd/sub-structuur. De "Boekingen importeren (RECRAS)"-knop op de Arrangementen
    staan. Boekingen zonder (of met een nog niet op "zeker" gezet) sjabloon tellen gewoon mee in de
    boekingenlijst, maar met 0 verbruik, totdat je ze koppelt/bevestigt.
 
+De knop **"Boekingen wissen"** naast de import-knop verwijdert in één keer alle boekingen (na
+bevestiging) — handig om met een schone lei opnieuw te testen, zonder dat je daarvoor een nieuw
+RECRAS-bestand nodig hebt.
+
 Alleen boekingen met status "definitief" tellen mee in het inkoopadvies (zie hierboven);
 "optie"/"voltooid" staan wel in de lijst, ter info. Elke productregel toont een select om het
 gekoppelde sjabloon te wijzigen — ook nuttig als de automatische naam-match een keer fout zit. De

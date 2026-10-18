@@ -61,6 +61,7 @@ interface SligroStore {
   voegBoekingToe: (boeking: Omit<Boeking, "id">) => void;
   updateBoeking: (id: string, patch: Partial<Omit<Boeking, "id">>) => void;
   verwijderBoeking: (id: string) => void;
+  wisBoekingen: () => void;
   importeerRecrasBoekingen: (regels: RecrasMatchRegel[]) => void;
 
   maakSeizoen: (naam: string, doelvoorraad: Record<string, number>) => string;
@@ -205,6 +206,12 @@ export const useSligroStore = create<SligroStore>()(
         set((state) => {
           if (!state.data) return;
           state.data.boekingen = state.data.boekingen.filter((x) => x.id !== id);
+        });
+      },
+      wisBoekingen: () => {
+        set((state) => {
+          if (!state.data) return;
+          state.data.boekingen = [];
         });
       },
       importeerRecrasBoekingen: (regels) => {

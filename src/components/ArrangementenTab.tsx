@@ -319,14 +319,34 @@ function BoekingenSectie({
   arrangementen: Arrangement[];
   wekenVooruit: number;
 }) {
+  const wisBoekingen = useSligroStore((s) => s.wisBoekingen);
   const groepen = useMemo(() => groepeerBoekingen(boekingen), [boekingen]);
   const ongekoppeld = boekingen.filter((b) => b.arrangement_id === null).length;
+
+  function boekingenWissen() {
+    if (boekingen.length === 0) return;
+    if (!window.confirm(`Alle ${boekingen.length} boekingen verwijderen? Dit kan niet ongedaan gemaakt worden.`)) {
+      return;
+    }
+    wisBoekingen();
+  }
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="display text-[20px] text-ink">Boekingen</h2>
-        <RecrasImportKnop arrangementen={arrangementen} />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={boekingenWissen}
+            disabled={boekingen.length === 0}
+            className="motion kicker inline-flex items-center gap-1.5 rounded-[999px] border border-border-light bg-white px-3.5 py-2 text-[11px] text-text-medium hover:border-accent disabled:opacity-45"
+          >
+            <Trash2 size={16} strokeWidth={2} />
+            Boekingen wissen
+          </button>
+          <RecrasImportKnop arrangementen={arrangementen} />
+        </div>
       </div>
       {ongekoppeld > 0 && (
         <p className="rounded-[8px] bg-amber-tint px-3 py-2 text-[12px] text-amber-text">
