@@ -2,12 +2,13 @@ import { Fragment, useMemo, useRef, useState } from "react";
 import { SearchInput } from "./SearchInput";
 import { EmptyState } from "./EmptyState";
 import { formatDate } from "../lib/format";
-import { ChevronDown, ChevronRight, Download, ListChecks, Upload } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, ListChecks, Pencil, Upload } from "lucide-react";
 import { useSligroData } from "../hooks/useSligroData";
 import { getVoorraadItems } from "../lib/data";
 import { useSligroStore } from "../lib/store";
 import { buildTelsheetCsv, parseTelsheetCsv } from "../lib/telsheet";
 import { downloadCsv } from "../lib/csv";
+import type { VoorraadItem } from "../types/sligro";
 
 const MUTATIE_LABEL: Record<string, string> = {
   telling: "Telling",
@@ -18,6 +19,116 @@ const MUTATIE_LABEL: Record<string, string> = {
 
 function vandaag(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function ArtikelGegevens({ item }: { item: VoorraadItem }) {
+  const updateArtikelGegevens = useSligroStore((s) => s.updateArtikelGegevens);
+  const [bewerken, setBewerken] = useState(false);
+  const [omschrijving, setOmschrijving] = useState(item.omschrijving);
+  const [verpakkingsgrootte, setVerpakkingsgrootte] = useState(String(item.verpakkingsgrootte));
+  const [status, setStatus] = useState(item.status);
+  const [arrangementAlleen, setArrangementAlleen] = useState(item.arrangement_alleen);
+
+  function opslaan() {
+    const nr = Number(verpakkingsgrootte);
+    if (!omschrijving.trim() || !Number.isFinite(nr) || nr <= 0) return;
+    updateArtikelGegevens(item.artikelnummer, {
+      omschrijving: omschrijving.trim(),
+      verpakkingsgrootte: nr,
+      status,
+      arrangement_alleen: arrangementAlleen,
+    });
+    setBewerken(false);
+  }
+
+  function annuleren() {
+    setOmschrijving(item.omschrijving);
+    setVerpakkingsgrootte(String(item.verpakkingsgrootte));
+    setStatus(item.status);
+    setArrangementAlleen(item.arrangement_alleen);
+    setBewerken(false);
+  }
+
+  if (!bewerken) {
+    return (
+      <div className="flex flex-wrap items-center gap-3 text-[13px] text-text-medium">
+        <span>Verpakking: {item.verpakkingsgrootte} stuks</span>
+        <span className={item.status === "zeker" ? "text-green-text" : "text-amber-text"}>
+          {item.status === "zeker" ? "Zeker" : "Controleer"}
+        </span>
+        {item.arrangement_alleen && <span className="text-text-muted">Alleen via arrangementen</span>}
+        <button
+          type="button"
+          onClick={() => setBewerken(true)}
+          className="motion kicker inline-flex items-center gap-1 rounded-[999px] border border-border-light px-2.5 py-1 text-[10px] text-text-medium hover:border-accent"
+        >
+          <Pencil size={12} strokeWidth={2} />
+          Bewerken
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-[8px] border border-border-light bg-white p-3">
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1">
+          <span className="kicker text-[10px] text-text-muted">Omschrijving</span>
+          <input
+            type="text"
+            value={omschrijving}
+            onChange={(e) => setOmschrijving(e.target.value)}
+            className="w-64 rounded-[8px] border border-border-light bg-white px-2 py-1.5 text-[13px] text-ink"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="kicker text-[10px] text-text-muted">Stuks per verpakking</span>
+          <input
+            type="number"
+            min={1}
+            value={verpakkingsgrootte}
+            onChange={(e) => setVerpakkingsgrootte(e.target.value)}
+            className="w-24 rounded-[8px] border border-border-light bg-white px-2 py-1.5 text-[13px] text-ink"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="kicker text-[10px] text-text-muted">Status</span>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as VoorraadItem["status"])}
+            className="rounded-[8px] border border-border-light bg-white px-2 py-1.5 text-[13px] text-ink"
+          >
+            <option value="zeker">Zeker — telt mee in inkoopadvies</option>
+            <option value="controleer">Controleer — telt nog niet mee</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-1.5 pb-1.5">
+          <input
+            type="checkbox"
+            checked={arrangementAlleen}
+            onChange={(e) => setArrangementAlleen(e.target.checked)}
+          />
+          <span className="text-[12px] text-text-medium">Alleen via arrangementen (niet los verkocht)</span>
+        </label>
+      </div>
+      <div className="flex gap-1.5">
+        <button
+          type="button"
+          onClick={opslaan}
+          className="motion kicker rounded-[999px] bg-accent px-3.5 py-1.5 text-[10px] text-accent-on"
+        >
+          Opslaan
+        </button>
+        <button
+          type="button"
+          onClick={annuleren}
+          className="motion kicker rounded-[999px] border border-border-light px-3.5 py-1.5 text-[10px] text-text-medium"
+        >
+          Annuleren
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function VoorraadTab() {
@@ -241,7 +352,8 @@ export function VoorraadTab() {
                     </tr>
                     {isOpen && !bulkModus && (
                       <tr className="border-b border-border-light bg-zand/30 last:border-b-0">
-                        <td colSpan={6} className="px-4 py-3">
+                        <td colSpan={6} className="flex flex-col gap-3 px-4 py-3">
+                          <ArtikelGegevens item={item} />
                           {item.mutaties.length === 0 ? (
                             <p className="text-[13px] text-text-muted">Geen mutatiehistorie bekend.</p>
                           ) : (

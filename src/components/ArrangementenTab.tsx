@@ -372,14 +372,104 @@ function BoekingenSectie({
   );
 }
 
+const NIEUW_ARTIKEL_WAARDE = "__nieuw__";
+
+function NieuwArtikelForm({
+  onAangemaakt,
+  onAnnuleren,
+  donker,
+}: {
+  onAangemaakt: (artikelnummer: string) => void;
+  onAnnuleren: () => void;
+  donker: boolean;
+}) {
+  const voegArtikelToe = useSligroStore((s) => s.voegArtikelToe);
+  const [artikelnummer, setArtikelnummer] = useState("");
+  const [omschrijving, setOmschrijving] = useState("");
+  const [verpakkingsgrootte, setVerpakkingsgrootte] = useState("1");
+  const [fout, setFout] = useState<string | null>(null);
+
+  const geldig = artikelnummer.trim() !== "" && omschrijving.trim() !== "" && Number(verpakkingsgrootte) > 0;
+
+  function aanmaken() {
+    if (!geldig) return;
+    const nr = artikelnummer.trim();
+    const gelukt = voegArtikelToe(nr, omschrijving.trim(), Number(verpakkingsgrootte), new Date().toISOString().slice(0, 10));
+    if (!gelukt) {
+      setFout(`Sligro-artikelnummer ${nr} bestaat al.`);
+      return;
+    }
+    onAangemaakt(nr);
+  }
+
+  const inputClass = donker
+    ? "rounded-[8px] border border-border-dark bg-navy-light px-2 py-1.5 text-[13px] text-creme placeholder:text-text-on-dark"
+    : "rounded-[8px] border border-border-light bg-white px-2 py-1.5 text-[13px] text-ink";
+
+  return (
+    <div className={`flex flex-col gap-1.5 rounded-[8px] p-2 ${donker ? "bg-navy-light" : "bg-zand/40"}`}>
+      <p className={`kicker text-[10px] ${donker ? "text-text-on-dark" : "text-text-muted"}`}>
+        Nieuw Sligro-artikel (staat nog niet in de voorraadlijst)
+      </p>
+      <input
+        type="text"
+        placeholder="Sligro-artikelnummer"
+        value={artikelnummer}
+        onChange={(e) => setArtikelnummer(e.target.value)}
+        className={inputClass}
+      />
+      <input
+        type="text"
+        placeholder="Omschrijving"
+        value={omschrijving}
+        onChange={(e) => setOmschrijving(e.target.value)}
+        className={inputClass}
+      />
+      <label className="flex items-center gap-1.5">
+        <span className={`text-[11px] ${donker ? "text-text-on-dark" : "text-text-muted"}`}>Per verpakking:</span>
+        <input
+          type="number"
+          min={1}
+          value={verpakkingsgrootte}
+          onChange={(e) => setVerpakkingsgrootte(e.target.value)}
+          className={`w-20 ${inputClass}`}
+        />
+      </label>
+      {fout && <p className="text-[11px] text-amber-text">{fout}</p>}
+      <div className="flex gap-1.5">
+        <button
+          type="button"
+          disabled={!geldig}
+          onClick={aanmaken}
+          className="motion kicker rounded-[999px] bg-accent px-3 py-1.5 text-[10px] text-accent-on disabled:opacity-45"
+        >
+          Aanmaken en toevoegen
+        </button>
+        <button
+          type="button"
+          onClick={onAnnuleren}
+          className={`motion kicker rounded-[999px] border px-3 py-1.5 text-[10px] ${
+            donker ? "border-border-dark text-text-on-dark" : "border-border-light text-text-medium"
+          }`}
+        >
+          Annuleren
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ArtikelKiezer({
   voorraad,
   onKies,
+  donker = false,
 }: {
   voorraad: Record<string, { omschrijving: string }>;
   onKies: (sligronummer: string) => void;
+  donker?: boolean;
 }) {
   const [waarde, setWaarde] = useState("");
+  const [nieuwFormulier, setNieuwFormulier] = useState(false);
   const opties = useMemo(
     () =>
       Object.entries(voorraad)
@@ -387,11 +477,28 @@ function ArtikelKiezer({
         .sort((a, b) => a.naam.localeCompare(b.naam, "nl")),
     [voorraad],
   );
+
+  if (nieuwFormulier) {
+    return (
+      <NieuwArtikelForm
+        donker={donker}
+        onAnnuleren={() => setNieuwFormulier(false)}
+        onAangemaakt={(nr) => {
+          onKies(nr);
+          setNieuwFormulier(false);
+        }}
+      />
+    );
+  }
+
   return (
     <select
       value={waarde}
       onChange={(e) => {
-        if (e.target.value) {
+        if (e.target.value === NIEUW_ARTIKEL_WAARDE) {
+          setNieuwFormulier(true);
+          setWaarde("");
+        } else if (e.target.value) {
           onKies(e.target.value);
           setWaarde("");
         }
@@ -404,6 +511,7 @@ function ArtikelKiezer({
           {o.naam} (#{o.nr})
         </option>
       ))}
+      <option value={NIEUW_ARTIKEL_WAARDE}>+ Nieuw Sligro-artikel aanmaken…</option>
     </select>
   );
 }
@@ -531,6 +639,7 @@ function ArrangementKaart({
 
       <ArtikelKiezer
         voorraad={voorraad}
+        donker
         onKies={(nr) =>
           updateArrangement(arrangement.id, {
             items: [...arrangement.items, { sligronummer: nr, per_persoon: 1 }],

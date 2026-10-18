@@ -68,7 +68,7 @@ localStorage als persistentielaag, niet een database. Dat betekent:
 
 | Tab | Inhoud | Schrijfacties |
 | --- | --- | --- |
-| **Voorraad** | Tabel, zoeken, mutatiehistorie | Per-rij "Bijwerken", bulkmodus "Hele lijst bijwerken", telsheet export/import (CSV) |
+| **Voorraad** | Tabel, zoeken, mutatiehistorie | Per-rij "Bijwerken" (telling), bulkmodus "Hele lijst bijwerken", telsheet export/import (CSV), artikelgegevens bewerken (omschrijving/verpakkingsgrootte/status/alleen-arrangementen) |
 | **Koppeltabel** | Lightspeed ↔ Sligro-koppeling, filterpills | Alleen-lezen (zoals fase 1) |
 | **Leveringen** | Kaart per bestelling/levering | Alleen-lezen; leveringen komen binnen via de Lightspeed-importknop of worden handmatig toegevoegd aan de brondata |
 | **Trends** | Verkoop per periode per artikel (sluit `arrangement_alleen`-artikelen uit) | Alleen-lezen; nieuwe kolom verschijnt automatisch na een Lightspeed-import |
@@ -171,6 +171,18 @@ Productsjablonen-grid heeft filterpills (Alles/Zeker/Controleer/N.v.t.) en toont
 (hoe vaak/voor hoeveel personen geboekt, over alle huidige boekingen heen) per kaart, vaakst
 gebruikte sjabloon bovenaan — zodat een lange lijst overzichtelijk blijft en duidelijk is waar het
 invullen van Sligro-verbruik het eerst loont.
+
+Productsjablonen en handmatige boekingen staan los van de RECRAS-import: je kunt op elk moment
+zelf een nieuw productsjabloon aanmaken (dashed kaart onderaan de grid) en er Sligro-producten aan
+koppelen via "+ Product toevoegen…". Staat het benodigde Sligro-artikel nog niet in de
+voorraadlijst, dan kies je in diezelfde lijst **"+ Nieuw Sligro-artikel aanmaken…"**: een klein
+formuliertje (artikelnummer, omschrijving, stuks per verpakking) maakt het artikel aan in
+`data.voorraad` (status "zeker", `arrangement_alleen: true` — het wordt per definitie niet los
+verkocht) en koppelt het meteen aan het sjabloon waar je mee bezig was. Een duplicaat-artikelnummer
+wordt geweigerd (`voegArtikelToe` in `src/lib/store.ts` overschrijft nooit een bestaand artikel).
+Achteraf de omschrijving, verpakkingsgrootte, status of "alleen via arrangementen"-vlag van een
+artikel aanpassen kan via het potlood-icoon in de uitgeklapte rij op de Voorraad-tab
+(`ArtikelGegevens` in `VoorraadTab.tsx`) — los van het bijwerken van de voorraadstand zelf.
 
 ## CSV-formaten
 

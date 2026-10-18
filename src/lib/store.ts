@@ -5,6 +5,7 @@ import { DEFAULT_BUFFER_PCT, DEFAULT_WEKEN_VOORUIT } from "./inkoopadvies";
 import type {
   Arrangement,
   ArrangementStatus,
+  ArtikelStatus,
   Boeking,
   SligroData,
 } from "../types/sligro";
@@ -44,6 +45,24 @@ interface SligroStore {
     entries: { artikelnummer: string; aantal: number }[],
     datum: string,
     bron: string,
+  ) => void;
+  // Geeft false (en doet niets) als het artikelnummer al bestaat — voorkomt
+  // dat een bestaand artikel per ongeluk wordt overschreven, want voorraad
+  // is een Record met artikelnummer als key.
+  voegArtikelToe: (
+    artikelnummer: string,
+    omschrijving: string,
+    verpakkingsgrootte: number,
+    datum: string,
+  ) => boolean;
+  updateArtikelGegevens: (
+    artikelnummer: string,
+    patch: Partial<{
+      omschrijving: string;
+      verpakkingsgrootte: number;
+      status: ArtikelStatus;
+      arrangement_alleen: boolean;
+    }>,
   ) => void;
 
   verwerkVerkoopImport: (
@@ -119,6 +138,33 @@ export const useSligroStore = create<SligroStore>()(
             item.laatst_bijgewerkt = datum;
             item.laatste_telling = datum;
           }
+        });
+      },
+
+      voegArtikelToe: (artikelnummer, omschrijving, verpakkingsgrootte, datum) => {
+        if (get().data?.voorraad[artikelnummer]) return false;
+        set((state) => {
+          if (!state.data) return;
+          state.data.voorraad[artikelnummer] = {
+            omschrijving,
+            aantal_stuks: 0,
+            verpakkingsgrootte,
+            laatst_bijgewerkt: datum,
+            laatste_telling: datum,
+            status: "zeker",
+            // Een artikel dat je zelf aanmaakt voor een productsjabloon is
+            // per definitie niet los verkocht via Lightspeed — anders had
+            // het al in de voorraadlijst gestaan.
+            arrangement_alleen: true,
+            mutaties: [],
+          };
+        });
+        return true;
+      },
+      updateArtikelGegevens: (artikelnummer, patch) => {
+        set((state) => {
+          const item = state.data?.voorraad[artikelnummer];
+          if (item) Object.assign(item, patch);
         });
       },
 
