@@ -63,40 +63,47 @@ export interface Levering {
   artikelen: LeveringArtikel[];
 }
 
-// Eén regel in een arrangement- of optiesjabloon: hoeveel stuks van een
-// Sligro-artikel er per persoon nodig zijn.
+// Eén regel in een productsjabloon: hoeveel stuks van een Sligro-artikel er
+// per persoon nodig zijn.
 export interface ArrangementItem {
   sligronummer: string;
   per_persoon: number;
 }
 
+// Eén herbruikbaar, boekbaar product (vóór deze iteratie gesplitst in
+// Arrangement + Optie — dat onderscheid is losgelaten omdat RECRAS zelf geen
+// hoofd/sub-structuur levert, alleen een platte lijst producten per boeking,
+// zie Boeking en src/lib/recras-import.ts). "naam" is ook de matchsleutel bij
+// het importeren van een RECRAS-export. status: "controleer" = net
+// aangemaakt (bv. automatisch bij import) en nog zonder of met onvolledig
+// Sligro-verbruik; telt daardoor niet mee in het inkoopadvies totdat je 'm
+// op "zeker" zet.
 export interface Arrangement {
   id: string;
   naam: string;
   items: ArrangementItem[];
+  status: ArtikelStatus;
 }
 
-// Optie-item kan een standaarditem van het arrangement vervangen (vervangt
-// gezet) of erbij komen (vervangt: null).
-export interface OptieItem {
-  sligronummer: string;
-  per_persoon: number;
-  vervangt: string | null;
-}
-
-export interface Optie {
-  id: string;
-  naam: string;
-  items: OptieItem[];
-}
-
-// aantallen per optie zijn een SUBSET van aantal_personen, niet erbovenop.
+// Eén geboekte productregel. Komt ofwel uit een RECRAS "Geboekte producten"-
+// export (bron: "recras", zie Beheer-knop op de Arrangementen-tab) of is
+// handmatig ingevoerd. arrangement_id is null zolang product_naam nog niet
+// aan een sjabloon gekoppeld is (vergelijkbaar met "controleer" in de
+// Koppeltabel) — product_naam blijft dan de enige bron van waarheid voor wat
+// er geboekt is. status komt 1-op-1 uit RECRAS ("optie" boekingen zijn nog
+// niet zeker en tellen niet mee in het inkoopadvies, zie
+// berekenBenodigdUitArrangementen); handmatige boekingen zijn altijd
+// "definitief".
 export interface Boeking {
   id: string;
-  arrangement_id: string;
-  datum: string;
+  arrangement_id: string | null;
+  product_naam: string;
   aantal_personen: number;
-  opties: Record<string, number>;
+  datum: string;
+  bron: "recras" | "handmatig";
+  recras_boeking: string | null;
+  boekingsnaam: string | null;
+  status: "definitief" | "optie" | "voltooid";
 }
 
 export interface Instellingen {
@@ -127,7 +134,6 @@ export interface SligroData {
   };
   leveringen: Levering[];
   arrangementen: Arrangement[];
-  opties: Optie[];
   boekingen: Boeking[];
   instellingen: Instellingen;
   seizoenen: Seizoen[];

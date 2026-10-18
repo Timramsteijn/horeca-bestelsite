@@ -5,9 +5,9 @@ import { DEFAULT_BUFFER_PCT, DEFAULT_WEKEN_VOORUIT } from "./inkoopadvies";
 import type {
   Arrangement,
   Boeking,
-  Optie,
   SligroData,
 } from "../types/sligro";
+import type { RecrasMatchRegel } from "./recras-import";
 
 // De volledige dataset wordt client-side gehouden en bij elke wijziging naar
 // localStorage geschreven (zie PROMPT: "lokale opslag volstaat voor een
@@ -28,7 +28,6 @@ function nieuwId(): string {
 // veld aanspreekt stil vast (bv. "Seizoen aanmaken" doet dan niets zichtbaars).
 function vulOntbrekendeVeldenAan(data: SligroData): void {
   data.arrangementen ??= [];
-  data.opties ??= [];
   data.boekingen ??= [];
   data.seizoenen ??= [];
   data.instellingen ??= { weken_vooruit: DEFAULT_WEKEN_VOORUIT, buffer_pct: DEFAULT_BUFFER_PCT };
@@ -54,16 +53,14 @@ interface SligroStore {
   ) => void;
 
   maakArrangement: (naam: string) => string;
+  maakArrangementenBulk: (namen: string[]) => Record<string, string>;
   updateArrangement: (id: string, patch: Partial<Omit<Arrangement, "id">>) => void;
   verwijderArrangement: (id: string) => void;
-
-  maakOptie: (naam: string) => string;
-  updateOptie: (id: string, patch: Partial<Omit<Optie, "id">>) => void;
-  verwijderOptie: (id: string) => void;
 
   voegBoekingToe: (boeking: Omit<Boeking, "id">) => void;
   updateBoeking: (id: string, patch: Partial<Omit<Boeking, "id">>) => void;
   verwijderBoeking: (id: string) => void;
+  importeerRecrasBoekingen: (regels: RecrasMatchRegel[]) => void;
 
   maakSeizoen: (naam: string, doelvoorraad: Record<string, number>) => string;
   updateSeizoen: (id: string, patch: { naam?: string }) => void;
@@ -160,9 +157,21 @@ export const useSligroStore = create<SligroStore>()(
       maakArrangement: (naam) => {
         const id = nieuwId();
         set((state) => {
-          state.data?.arrangementen.push({ id, naam, items: [] });
+          state.data?.arrangementen.push({ id, naam, items: [], status: "controleer" });
         });
         return id;
+      },
+      maakArrangementenBulk: (namen) => {
+        const idPerNaam: Record<string, string> = {};
+        set((state) => {
+          if (!state.data) return;
+          for (const naam of namen) {
+            const id = nieuwId();
+            idPerNaam[naam] = id;
+            state.data.arrangementen.push({ id, naam, items: [], status: "controleer" });
+          }
+        });
+        return idPerNaam;
       },
       updateArrangement: (id, patch) => {
         set((state) => {
@@ -174,29 +183,8 @@ export const useSligroStore = create<SligroStore>()(
         set((state) => {
           if (!state.data) return;
           state.data.arrangementen = state.data.arrangementen.filter((x) => x.id !== id);
-          state.data.boekingen = state.data.boekingen.filter((b) => b.arrangement_id !== id);
-        });
-      },
-
-      maakOptie: (naam) => {
-        const id = nieuwId();
-        set((state) => {
-          state.data?.opties.push({ id, naam, items: [] });
-        });
-        return id;
-      },
-      updateOptie: (id, patch) => {
-        set((state) => {
-          const o = state.data?.opties.find((x) => x.id === id);
-          if (o) Object.assign(o, patch);
-        });
-      },
-      verwijderOptie: (id) => {
-        set((state) => {
-          if (!state.data) return;
-          state.data.opties = state.data.opties.filter((x) => x.id !== id);
           for (const b of state.data.boekingen) {
-            delete b.opties[id];
+            if (b.arrangement_id === id) b.arrangement_id = null;
           }
         });
       },
@@ -216,6 +204,29 @@ export const useSligroStore = create<SligroStore>()(
         set((state) => {
           if (!state.data) return;
           state.data.boekingen = state.data.boekingen.filter((x) => x.id !== id);
+        });
+      },
+      importeerRecrasBoekingen: (regels) => {
+        set((state) => {
+          if (!state.data) return;
+          // Een RECRAS-import is een verse, volledige momentopname van de
+          // aankomende boekingen — vervangt dus alle eerder via RECRAS
+          // geïmporteerde regels, maar laat handmatig ingevoerde boekingen
+          // ongemoeid.
+          state.data.boekingen = state.data.boekingen.filter((b) => b.bron !== "recras");
+          for (const regel of regels) {
+            state.data.boekingen.push({
+              id: nieuwId(),
+              arrangement_id: regel.arrangement_id,
+              product_naam: regel.product_naam,
+              aantal_personen: regel.aantal,
+              datum: regel.datum,
+              bron: "recras",
+              recras_boeking: regel.recras_boeking,
+              boekingsnaam: regel.boekingsnaam,
+              status: regel.status,
+            });
+          }
         });
       },
 

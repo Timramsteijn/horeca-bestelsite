@@ -9,21 +9,34 @@ import {
   samenvatBoekingConsumptie,
   type BoekingStatus,
 } from "../lib/arrangementen";
-import type { Arrangement, Boeking, Optie } from "../types/sligro";
+import type { Arrangement, Boeking } from "../types/sligro";
+import { RecrasImportKnop } from "./RecrasImportKnop";
+import { formatDate } from "../lib/format";
 
 function vandaag(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-const STATUS_LABEL: Record<BoekingStatus, string> = {
+const HORIZON_LABEL: Record<BoekingStatus, string> = {
   geweest: "Geweest",
   telt_mee: "Telt mee in advies",
   later: "Later",
 };
-const STATUS_CLASS: Record<BoekingStatus, string> = {
+const HORIZON_CLASS: Record<BoekingStatus, string> = {
   geweest: "bg-neutral-fill text-text-muted",
   telt_mee: "bg-green-tint text-green-text",
   later: "bg-keuring-tint text-keuring-text",
+};
+
+const RECRAS_STATUS_LABEL: Record<Boeking["status"], string> = {
+  definitief: "Definitief",
+  optie: "Optie",
+  voltooid: "Voltooid",
+};
+const RECRAS_STATUS_CLASS: Record<Boeking["status"], string> = {
+  definitief: "bg-green-tint text-green-text",
+  optie: "bg-amber-tint text-amber-text",
+  voltooid: "bg-neutral-fill text-text-muted",
 };
 
 function Stepper({
@@ -60,45 +73,43 @@ function Stepper({
   );
 }
 
-function NieuweBoekingForm({
-  arrangementen,
-  opties,
-}: {
-  arrangementen: Arrangement[];
-  opties: Optie[];
-}) {
+function NieuweBoekingForm({ arrangementen }: { arrangementen: Arrangement[] }) {
   const voegBoekingToe = useSligroStore((s) => s.voegBoekingToe);
   const [arrangementId, setArrangementId] = useState("");
   const [datum, setDatum] = useState(vandaag());
   const [personen, setPersonen] = useState("");
-  const [optieWaarden, setOptieWaarden] = useState<Record<string, string>>({});
 
   const geldig = arrangementId !== "" && datum !== "" && Number(personen) > 0;
 
   function toevoegen() {
     if (!geldig) return;
-    const optiesOut: Record<string, number> = {};
-    for (const [id, v] of Object.entries(optieWaarden)) {
-      const n = Number(v);
-      if (Number.isFinite(n) && n > 0) optiesOut[id] = n;
-    }
-    voegBoekingToe({ arrangement_id: arrangementId, datum, aantal_personen: Number(personen), opties: optiesOut });
+    const sjabloon = arrangementen.find((a) => a.id === arrangementId);
+    if (!sjabloon) return;
+    voegBoekingToe({
+      arrangement_id: arrangementId,
+      product_naam: sjabloon.naam,
+      datum,
+      aantal_personen: Number(personen),
+      bron: "handmatig",
+      recras_boeking: null,
+      boekingsnaam: null,
+      status: "definitief",
+    });
     setArrangementId("");
     setDatum(vandaag());
     setPersonen("");
-    setOptieWaarden({});
   }
 
   return (
     <div className="flex flex-col gap-3 rounded-[10px] border border-border-light bg-white p-4 shadow-[var(--shadow-card)]">
-      <p className="kicker text-[11px] text-text-muted">Nieuwe boeking</p>
+      <p className="kicker text-[11px] text-text-muted">Handmatig een boeking toevoegen</p>
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1">
-          <span className="kicker text-[10px] text-text-muted">Arrangement</span>
+          <span className="kicker text-[10px] text-text-muted">Productsjabloon</span>
           <select
             value={arrangementId}
             onChange={(e) => setArrangementId(e.target.value)}
-            className="min-w-[160px] rounded-[8px] border border-border-light bg-white px-3 py-2 text-[14px] text-ink"
+            className="min-w-[200px] rounded-[8px] border border-border-light bg-white px-3 py-2 text-[14px] text-ink"
           >
             <option value="">Kies…</option>
             {arrangementen.map((a) => (
@@ -127,18 +138,6 @@ function NieuweBoekingForm({
             className="w-24 rounded-[8px] border border-border-light bg-white px-3 py-2 text-[14px] text-ink"
           />
         </label>
-        {opties.map((optie) => (
-          <label key={optie.id} className="flex flex-col gap-1">
-            <span className="kicker text-[10px] text-text-muted">Waarvan {optie.naam}</span>
-            <input
-              type="number"
-              min={0}
-              value={optieWaarden[optie.id] ?? ""}
-              onChange={(e) => setOptieWaarden((w) => ({ ...w, [optie.id]: e.target.value }))}
-              className="w-24 rounded-[8px] border border-border-light bg-white px-3 py-2 text-[14px] text-ink"
-            />
-          </label>
-        ))}
         <button
           type="button"
           disabled={!geldig}
@@ -152,90 +151,144 @@ function NieuweBoekingForm({
   );
 }
 
-function BoekingRij({
+function BoekingRegelRij({
   boeking,
   arrangementen,
-  opties,
   wekenVooruit,
 }: {
   boeking: Boeking;
   arrangementen: Arrangement[];
-  opties: Optie[];
   wekenVooruit: number;
 }) {
   const updateBoeking = useSligroStore((s) => s.updateBoeking);
   const verwijderBoeking = useSligroStore((s) => s.verwijderBoeking);
   const arrangement = arrangementen.find((a) => a.id === boeking.arrangement_id);
-  const status = bepaalBoekingStatus(boeking.datum, vandaag(), wekenVooruit);
-  const consumptie = berekenBoekingConsumptie(boeking, arrangement, opties);
+  const horizonStatus = bepaalBoekingStatus(boeking.datum, vandaag(), wekenVooruit);
+  const consumptie = berekenBoekingConsumptie(boeking, arrangement);
   const { totaalStuks, aantalArtikelen } = samenvatBoekingConsumptie(consumptie);
-  const optieTotaal = Object.values(boeking.opties).reduce((a, b) => a + b, 0);
-  const regulier = boeking.aantal_personen - optieTotaal;
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-[10px] border border-border-light bg-white p-4 shadow-[var(--shadow-card)]">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-[15px] font-semibold text-ink">{arrangement?.naam ?? "(verwijderd arrangement)"}</span>
-          <input
-            type="date"
-            value={boeking.datum}
-            onChange={(e) => updateBoeking(boeking.id, { datum: e.target.value })}
-            className="rounded-[8px] border border-border-light bg-white px-2 py-1 text-[13px] text-ink"
-          />
-          <span className={`kicker rounded-[999px] px-2.5 py-1 text-[10px] ${STATUS_CLASS[status]}`}>
-            {STATUS_LABEL[status]}
+    <tr className="border-b border-border-light last:border-b-0">
+      <td className="px-3 py-2 text-ink">
+        <p>{boeking.product_naam}</p>
+        <select
+          value={boeking.arrangement_id ?? ""}
+          onChange={(e) => updateBoeking(boeking.id, { arrangement_id: e.target.value || null })}
+          className={`mt-1 rounded-[8px] border px-2 py-1 text-[12px] ${
+            boeking.arrangement_id ? "border-border-light text-text-muted" : "border-amber-text bg-amber-tint text-amber-text"
+          }`}
+        >
+          <option value="">— nog niet gekoppeld —</option>
+          {arrangementen.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.naam}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-3 py-2 text-right text-ink">
+        <Stepper
+          value={boeking.aantal_personen}
+          min={1}
+          onChange={(v) => updateBoeking(boeking.id, { aantal_personen: v })}
+        />
+      </td>
+      <td className="px-3 py-2 text-ink">{formatDate(boeking.datum)}</td>
+      <td className="px-3 py-2">
+        <div className="flex flex-wrap gap-1">
+          <span className={`kicker rounded-[999px] px-2 py-0.5 text-[10px] ${RECRAS_STATUS_CLASS[boeking.status]}`}>
+            {RECRAS_STATUS_LABEL[boeking.status]}
+          </span>
+          <span className={`kicker rounded-[999px] px-2 py-0.5 text-[10px] ${HORIZON_CLASS[horizonStatus]}`}>
+            {HORIZON_LABEL[horizonStatus]}
           </span>
         </div>
+      </td>
+      <td className="px-3 py-2 text-right text-text-muted">
+        {aantalArtikelen > 0 ? `${Math.round(totaalStuks * 100) / 100} stuks (${aantalArtikelen} art.)` : "—"}
+      </td>
+      <td className="px-3 py-2 text-right">
         <button
           type="button"
           onClick={() => verwijderBoeking(boeking.id)}
-          className="motion flex h-8 w-8 items-center justify-center rounded-[999px] text-text-muted hover:bg-amber-tint hover:text-amber-text"
-          aria-label="Boeking verwijderen"
+          className="motion flex h-7 w-7 items-center justify-center rounded-[999px] text-text-muted hover:bg-amber-tint hover:text-amber-text"
+          aria-label="Boekingsregel verwijderen"
         >
-          <Trash2 size={16} strokeWidth={2} />
+          <Trash2 size={14} strokeWidth={2} />
         </button>
-      </div>
+      </td>
+    </tr>
+  );
+}
 
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex flex-col gap-1">
-          <span className="kicker text-[10px] text-text-muted">Totaal personen</span>
-          <Stepper
-            value={boeking.aantal_personen}
-            min={1}
-            onChange={(v) => updateBoeking(boeking.id, { aantal_personen: v })}
-          />
+interface BoekingenGroep {
+  sleutel: string;
+  boekingsnaam: string | null;
+  recras_boeking: string | null;
+  regels: Boeking[];
+}
+
+function groepeerBoekingen(boekingen: Boeking[]): BoekingenGroep[] {
+  const map = new Map<string, BoekingenGroep>();
+  for (const b of boekingen) {
+    const sleutel = b.recras_boeking ?? `handmatig-${b.id}`;
+    let groep = map.get(sleutel);
+    if (!groep) {
+      groep = { sleutel, boekingsnaam: b.boekingsnaam, recras_boeking: b.recras_boeking, regels: [] };
+      map.set(sleutel, groep);
+    }
+    groep.regels.push(b);
+  }
+  return Array.from(map.values()).sort((a, b) => {
+    const minDatum = (g: BoekingenGroep) => g.regels.reduce((min, r) => (r.datum < min ? r.datum : min), g.regels[0].datum);
+    return minDatum(a).localeCompare(minDatum(b));
+  });
+}
+
+function BoekingenGroepKaart({
+  groep,
+  arrangementen,
+  wekenVooruit,
+}: {
+  groep: BoekingenGroep;
+  arrangementen: Arrangement[];
+  wekenVooruit: number;
+}) {
+  const gesorteerd = useMemo(
+    () => [...groep.regels].sort((a, b) => a.datum.localeCompare(b.datum)),
+    [groep.regels],
+  );
+
+  return (
+    <div className="flex flex-col gap-2.5 rounded-[10px] border border-border-light bg-white p-4 shadow-[var(--shadow-card)]">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <p className="text-[15px] font-semibold text-ink">{groep.boekingsnaam || "Handmatige boeking"}</p>
+          {groep.recras_boeking && (
+            <p className="kicker text-[10px] text-text-muted">RECRAS-boeking {groep.recras_boeking}</p>
+          )}
         </div>
-        {opties.map((optie) => (
-          <div key={optie.id} className="flex flex-col gap-1">
-            <span className="kicker text-[10px] text-text-muted">Waarvan {optie.naam}</span>
-            <Stepper
-              value={boeking.opties[optie.id] ?? 0}
-              min={0}
-              max={boeking.aantal_personen}
-              onChange={(v) =>
-                updateBoeking(boeking.id, { opties: { ...boeking.opties, [optie.id]: v } })
-              }
-            />
-          </div>
-        ))}
+        <p className="text-[12px] text-text-muted">{groep.regels.length} productregel(s)</p>
       </div>
-
-      <p className="text-[12px] text-text-muted">
-        {boeking.aantal_personen} personen
-        {optieTotaal > 0 && (
-          <>
-            {" ("}
-            {opties
-              .filter((o) => (boeking.opties[o.id] ?? 0) > 0)
-              .map((o) => `${o.naam.toLowerCase()}: ${boeking.opties[o.id]}`)
-              .join(", ")}
-            {` en ${regulier} regulier)`}
-          </>
-        )}
-        {" · "}
-        {Math.round(totaalStuks * 100) / 100} stuks over {aantalArtikelen} artikelen
-      </p>
+      <div className="overflow-x-auto rounded-[10px] border border-border-light">
+        <table className="w-full min-w-[640px] border-collapse text-left text-[13px]">
+          <thead>
+            <tr className="border-b border-border-light bg-zand/40">
+              <th className="px-3 py-2 text-[11px] font-semibold text-text-muted">Product</th>
+              <th className="px-3 py-2 text-right text-[11px] font-semibold text-text-muted">Aantal</th>
+              <th className="px-3 py-2 text-[11px] font-semibold text-text-muted">Datum</th>
+              <th className="px-3 py-2 text-[11px] font-semibold text-text-muted">Status</th>
+              <th className="px-3 py-2 text-right text-[11px] font-semibold text-text-muted">Verbruik</th>
+              <th className="px-3 py-2" />
+            </tr>
+          </thead>
+          <tbody>
+            {gesorteerd.map((b) => (
+              <BoekingRegelRij key={b.id} boeking={b} arrangementen={arrangementen} wekenVooruit={wekenVooruit} />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -243,36 +296,38 @@ function BoekingRij({
 function BoekingenSectie({
   boekingen,
   arrangementen,
-  opties,
   wekenVooruit,
 }: {
   boekingen: Boeking[];
   arrangementen: Arrangement[];
-  opties: Optie[];
   wekenVooruit: number;
 }) {
-  const gesorteerd = useMemo(() => [...boekingen].sort((a, b) => a.datum.localeCompare(b.datum)), [boekingen]);
+  const groepen = useMemo(() => groepeerBoekingen(boekingen), [boekingen]);
+  const ongekoppeld = boekingen.filter((b) => b.arrangement_id === null).length;
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="display text-[20px] text-ink">Geboekte arrangementen</h2>
-      {arrangementen.length === 0 ? (
-        <EmptyState message="Maak eerst een arrangement aan (hieronder) voordat je kunt boeken." />
-      ) : (
-        <NieuweBoekingForm arrangementen={arrangementen} opties={opties} />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="display text-[20px] text-ink">Boekingen</h2>
+        <RecrasImportKnop arrangementen={arrangementen} />
+      </div>
+      {ongekoppeld > 0 && (
+        <p className="rounded-[8px] bg-amber-tint px-3 py-2 text-[12px] text-amber-text">
+          {ongekoppeld} productregel(s) nog niet gekoppeld aan een sjabloon — kies er hieronder één, of maak eerst
+          een sjabloon aan.
+        </p>
       )}
-      {gesorteerd.length === 0 ? (
-        <EmptyState message="Nog geen boekingen." />
+      {arrangementen.length === 0 ? (
+        <EmptyState message="Maak eerst een productsjabloon aan (hieronder) voordat je handmatig kunt boeken." />
+      ) : (
+        <NieuweBoekingForm arrangementen={arrangementen} />
+      )}
+      {groepen.length === 0 ? (
+        <EmptyState message="Nog geen boekingen. Importeer een RECRAS-overzicht of voeg er handmatig één toe." />
       ) : (
         <div className="flex flex-col gap-2.5">
-          {gesorteerd.map((b) => (
-            <BoekingRij
-              key={b.id}
-              boeking={b}
-              arrangementen={arrangementen}
-              opties={opties}
-              wekenVooruit={wekenVooruit}
-            />
+          {groepen.map((g) => (
+            <BoekingenGroepKaart key={g.sleutel} groep={g} arrangementen={arrangementen} wekenVooruit={wekenVooruit} />
           ))}
         </div>
       )}
@@ -325,23 +380,66 @@ function ArrangementKaart({
 }) {
   const updateArrangement = useSligroStore((s) => s.updateArrangement);
   const verwijderArrangement = useSligroStore((s) => s.verwijderArrangement);
+  const [hernoemen, setHernoemen] = useState(false);
+  const [naamWaarde, setNaamWaarde] = useState(arrangement.naam);
+
+  function naamOpslaan() {
+    const naam = naamWaarde.trim();
+    if (naam) updateArrangement(arrangement.id, { naam });
+    setHernoemen(false);
+  }
 
   return (
     <div className="flex flex-col gap-2.5 rounded-[18px] bg-navy p-4 text-creme">
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-[15px] font-semibold text-creme">{arrangement.naam}</p>
+        <div className="min-w-0 flex-1">
+          {hernoemen ? (
+            <input
+              type="text"
+              autoFocus
+              value={naamWaarde}
+              onChange={(e) => setNaamWaarde(e.target.value)}
+              onBlur={naamOpslaan}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") naamOpslaan();
+                if (e.key === "Escape") {
+                  setNaamWaarde(arrangement.naam);
+                  setHernoemen(false);
+                }
+              }}
+              className="w-full rounded-[8px] border border-border-dark bg-navy-light px-2 py-1 text-[15px] text-creme"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setHernoemen(true)}
+              className="motion truncate text-left text-[15px] font-semibold text-creme hover:underline"
+              title="Naam bewerken — moet overeenkomen met de RECRAS-productnaam om te matchen"
+            >
+              {arrangement.naam}
+            </button>
+          )}
           <p className="kicker text-[10px] text-text-on-dark">Per persoon</p>
         </div>
         <button
           type="button"
           onClick={() => verwijderArrangement(arrangement.id)}
-          className="motion flex h-8 w-8 items-center justify-center rounded-[999px] text-text-on-dark hover:bg-navy-light"
-          aria-label="Arrangement verwijderen"
+          className="motion flex h-8 w-8 shrink-0 items-center justify-center rounded-[999px] text-text-on-dark hover:bg-navy-light"
+          aria-label="Productsjabloon verwijderen"
         >
           <Trash2 size={16} strokeWidth={2} />
         </button>
       </div>
+
+      <button
+        type="button"
+        onClick={() => updateArrangement(arrangement.id, { status: arrangement.status === "zeker" ? "controleer" : "zeker" })}
+        className={`motion kicker w-fit rounded-[999px] px-2.5 py-1 text-[10px] ${
+          arrangement.status === "zeker" ? "bg-green-tint text-green-text" : "bg-amber-tint text-amber-text"
+        }`}
+      >
+        {arrangement.status === "zeker" ? "Zeker — telt mee in advies" : "Controleer — telt nog niet mee"}
+      </button>
 
       <div className="flex flex-col gap-2">
         {arrangement.items.map((item, i) => (
@@ -395,12 +493,12 @@ function NieuwArrangementKaart() {
   const [naam, setNaam] = useState("");
   return (
     <div className="flex flex-col gap-2.5 rounded-[18px] border border-dashed border-border-light bg-white p-4">
-      <p className="kicker text-[11px] text-text-muted">Nieuw arrangement</p>
+      <p className="kicker text-[11px] text-text-muted">Nieuw productsjabloon</p>
       <input
         type="text"
         value={naam}
         onChange={(e) => setNaam(e.target.value)}
-        placeholder="Naam, bv. BBQ"
+        placeholder="Naam, exact zoals in RECRAS"
         className="rounded-[8px] border border-border-light bg-white px-3 py-2 text-[14px] text-ink"
       />
       <button
@@ -418,168 +516,30 @@ function NieuwArrangementKaart() {
   );
 }
 
-function OptieKaart({
-  optie,
-  voorraad,
-  vervangKandidaten,
-}: {
-  optie: Optie;
-  voorraad: Record<string, { omschrijving: string }>;
-  vervangKandidaten: { nr: string; naam: string }[];
-}) {
-  const updateOptie = useSligroStore((s) => s.updateOptie);
-  const verwijderOptie = useSligroStore((s) => s.verwijderOptie);
-
-  return (
-    <div className="flex flex-col gap-2.5 rounded-[18px] border border-border-light bg-white p-4 shadow-[var(--shadow-card)]">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-[15px] font-semibold text-ink">{optie.naam}</p>
-          <p className="kicker text-[10px] text-text-muted">Per persoon</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => verwijderOptie(optie.id)}
-          className="motion flex h-8 w-8 items-center justify-center rounded-[999px] text-text-muted hover:bg-amber-tint hover:text-amber-text"
-          aria-label="Optie verwijderen"
-        >
-          <Trash2 size={16} strokeWidth={2} />
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        {optie.items.map((item, i) => (
-          <div key={item.sligronummer} className="flex flex-wrap items-center gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] text-ink">{voorraad[item.sligronummer]?.omschrijving ?? item.sligronummer}</p>
-              <p className="text-[11px] text-text-muted">#{item.sligronummer}</p>
-            </div>
-            <select
-              value={item.vervangt ?? ""}
-              onChange={(e) => {
-                const items = [...optie.items];
-                items[i] = { ...item, vervangt: e.target.value || null };
-                updateOptie(optie.id, { items });
-              }}
-              className="rounded-[8px] border border-border-light bg-white px-2 py-1 text-[12px] text-ink"
-            >
-              <option value="">Vervangt niets (extra)</option>
-              {vervangKandidaten.map((k) => (
-                <option key={k.nr} value={k.nr}>
-                  Vervangt: {k.naam}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
-              min={0}
-              step={0.1}
-              value={item.per_persoon}
-              onChange={(e) => {
-                const items = [...optie.items];
-                items[i] = { ...item, per_persoon: Number(e.target.value) };
-                updateOptie(optie.id, { items });
-              }}
-              className="w-20 rounded-[8px] border border-border-light bg-white px-2 py-1 text-right text-[13px] text-ink"
-            />
-            <button
-              type="button"
-              onClick={() => updateOptie(optie.id, { items: optie.items.filter((_, idx) => idx !== i) })}
-              className="motion flex h-7 w-7 items-center justify-center rounded-[999px] text-text-muted hover:bg-amber-tint hover:text-amber-text"
-              aria-label="Product verwijderen"
-            >
-              <Trash2 size={14} strokeWidth={2} />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <ArtikelKiezer
-        voorraad={voorraad}
-        onKies={(nr) =>
-          updateOptie(optie.id, { items: [...optie.items, { sligronummer: nr, per_persoon: 1, vervangt: null }] })
-        }
-      />
-    </div>
-  );
-}
-
-function NieuweOptieKaart() {
-  const maakOptie = useSligroStore((s) => s.maakOptie);
-  const [naam, setNaam] = useState("");
-  return (
-    <div className="flex flex-col gap-2.5 rounded-[18px] border border-dashed border-border-light bg-white p-4">
-      <p className="kicker text-[11px] text-text-muted">Nieuwe optie</p>
-      <input
-        type="text"
-        value={naam}
-        onChange={(e) => setNaam(e.target.value)}
-        placeholder="Naam, bv. Halal"
-        className="rounded-[8px] border border-border-light bg-white px-3 py-2 text-[14px] text-ink"
-      />
-      <button
-        type="button"
-        disabled={!naam.trim()}
-        onClick={() => {
-          maakOptie(naam.trim());
-          setNaam("");
-        }}
-        className="motion kicker rounded-[999px] bg-accent px-4 py-2 text-[11px] text-accent-on disabled:opacity-45"
-      >
-        Aanmaken
-      </button>
-    </div>
-  );
-}
-
 export function ArrangementenTab() {
   const data = useSligroData();
   const arrangementen = data?.arrangementen ?? [];
-  const opties = data?.opties ?? [];
   const boekingen = data?.boekingen ?? [];
   const voorraad = data?.voorraad ?? {};
   const instellingen = data?.instellingen;
-
-  const vervangKandidaten = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const a of arrangementen) {
-      for (const item of a.items) {
-        map.set(item.sligronummer, voorraad[item.sligronummer]?.omschrijving ?? item.sligronummer);
-      }
-    }
-    return Array.from(map.entries())
-      .map(([nr, naam]) => ({ nr, naam }))
-      .sort((a, b) => a.naam.localeCompare(b.naam, "nl"));
-  }, [arrangementen, voorraad]);
 
   if (!data || !instellingen) return <EmptyState message="Data laden…" />;
 
   return (
     <div className="flex flex-col gap-6">
-      <BoekingenSectie
-        boekingen={boekingen}
-        arrangementen={arrangementen}
-        opties={opties}
-        wekenVooruit={instellingen.weken_vooruit}
-      />
+      <BoekingenSectie boekingen={boekingen} arrangementen={arrangementen} wekenVooruit={instellingen.weken_vooruit} />
 
       <div className="flex flex-col gap-3">
-        <h2 className="display text-[20px] text-ink">Standaard arrangementen</h2>
+        <h2 className="display text-[20px] text-ink">Productsjablonen</h2>
+        <p className="text-[12px] text-text-muted">
+          Eén sjabloon per boekbaar RECRAS-product, met het Sligro-verbruik per persoon. De naam moet exact
+          overeenkomen met de productnaam in RECRAS om bij een import automatisch gekoppeld te worden.
+        </p>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
           {arrangementen.map((a) => (
             <ArrangementKaart key={a.id} arrangement={a} voorraad={voorraad} />
           ))}
           <NieuwArrangementKaart />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <h2 className="display text-[20px] text-ink">Extra opties</h2>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
-          {opties.map((o) => (
-            <OptieKaart key={o.id} optie={o} voorraad={voorraad} vervangKandidaten={vervangKandidaten} />
-          ))}
-          <NieuweOptieKaart />
         </div>
       </div>
     </div>

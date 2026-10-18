@@ -1,4 +1,4 @@
-import type { Arrangement, Boeking, Optie } from "../types/sligro";
+import type { Arrangement, Boeking } from "../types/sligro";
 
 export type BoekingStatus = "geweest" | "telt_mee" | "later";
 
@@ -14,38 +14,18 @@ export function bepaalBoekingStatus(
   return datum <= horizonIso ? "telt_mee" : "later";
 }
 
-/** Berekent, per Sligro-artikel, hoeveel stuks een boeking verbruikt: de
- * standaarditems van het arrangement (per persoon × totaal personen), waarbij
- * optie-items die een standaarditem "vervangen" dat aandeel overnemen i.p.v.
- * erbij komen. */
+/** Berekent, per Sligro-artikel, hoeveel stuks een boeking verbruikt: het
+ * gekoppelde productsjabloon (per persoon × totaal personen). Geeft lege
+ * consumptie als de boeking nog niet aan een sjabloon gekoppeld is. */
 export function berekenBoekingConsumptie(
   boeking: Boeking,
   arrangement: Arrangement | undefined,
-  opties: Optie[],
 ): Record<string, number> {
   const consumptie: Record<string, number> = {};
   if (!arrangement) return consumptie;
-
   for (const item of arrangement.items) {
     consumptie[item.sligronummer] = (consumptie[item.sligronummer] ?? 0) + item.per_persoon * boeking.aantal_personen;
   }
-
-  for (const [optieId, aantalPersonen] of Object.entries(boeking.opties)) {
-    if (aantalPersonen <= 0) continue;
-    const optie = opties.find((o) => o.id === optieId);
-    if (!optie) continue;
-    for (const item of optie.items) {
-      consumptie[item.sligronummer] = (consumptie[item.sligronummer] ?? 0) + item.per_persoon * aantalPersonen;
-      if (item.vervangt) {
-        const vervangenItem = arrangement.items.find((a) => a.sligronummer === item.vervangt);
-        if (vervangenItem) {
-          consumptie[item.vervangt] =
-            (consumptie[item.vervangt] ?? 0) - vervangenItem.per_persoon * aantalPersonen;
-        }
-      }
-    }
-  }
-
   return consumptie;
 }
 
@@ -63,19 +43,22 @@ export function samenvatBoekingConsumptie(consumptie: Record<string, number>): B
 }
 
 /** Som van de consumptie van alle boekingen die binnen de "weken vooruit"-
- * horizon vallen (status "telt_mee") — gebruikt in het inkoopadvies. */
+ * horizon vallen én status "definitief" hebben — gebruikt in het
+ * inkoopadvies. "optie"-boekingen zijn nog niet zeker en "voltooid"-
+ * boekingen liggen al achter ons, dus die tellen bewust niet mee. Een
+ * boeking zonder (of met nog "controleer") sjabloon levert vanzelf 0 op. */
 export function berekenBenodigdUitArrangementen(
   boekingen: Boeking[],
   arrangementen: Arrangement[],
-  opties: Optie[],
   vandaag: string,
   wekenVooruit: number,
 ): Record<string, number> {
   const totaal: Record<string, number> = {};
   for (const boeking of boekingen) {
+    if (boeking.status !== "definitief") continue;
     if (bepaalBoekingStatus(boeking.datum, vandaag, wekenVooruit) !== "telt_mee") continue;
-    const arrangement = arrangementen.find((a) => a.id === boeking.arrangement_id);
-    const consumptie = berekenBoekingConsumptie(boeking, arrangement, opties);
+    const arrangement = arrangementen.find((a) => a.id === boeking.arrangement_id && a.status === "zeker");
+    const consumptie = berekenBoekingConsumptie(boeking, arrangement);
     for (const [sligronummer, aantal] of Object.entries(consumptie)) {
       totaal[sligronummer] = (totaal[sligronummer] ?? 0) + aantal;
     }

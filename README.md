@@ -20,14 +20,22 @@ gebouwd is en de keuzes die daarbij gemaakt zijn.
   print-only regel (`.print-area`) voor de bestellijst-afdruk.
 - **Zustand** (`src/lib/store.ts`) met de `persist`-middleware (localStorage) en `immer` voor
   ergonomische geneste updates. Eén store bevat de **volledige** dataset (voorraad, koppeltabel,
-  leveringen, verkooptrends, arrangementen, opties, boekingen, instellingen) en wordt bij elke
+  leveringen, verkooptrends, arrangementen, boekingen, seizoenen, instellingen) en wordt bij elke
   wijziging naar localStorage geschreven.
 - **`@astrojs/cloudflare`-adapter**, `output: "static"`. Sessies/D1/KV blijven uitgeschakeld
   (`session: false` in `astro.config.mjs`) — dit project heeft nog steeds geen *server*-state,
   alleen *client*-state (zie hieronder).
 - **lucide-react**, stroke-width 2.
-- **Vitest**: rekenregels (`src/lib/inkoopadvies.ts`, `src/lib/arrangementen.ts`) en CSV/Lightspeed-
-  parsing (`src/lib/csv.ts`, `src/lib/telsheet.ts`, `src/lib/lightspeed-import.ts`), 44 tests.
+- **`read-excel-file`** voor het clientside inlezen van de RECRAS-boekingenexport (.xlsx), zie
+  "RECRAS-import" hieronder. Bewust **niet** het populairdere `xlsx`-pakket (SheetJS): de
+  npm-published versie (0.18.5, laatste die SheetJS daar zet) heeft twee onopgeloste
+  kwetsbaarheden (prototype pollution, ReDoS — "no fix available" via npm; SheetJS publiceert
+  patches alleen nog via hun eigen cdn.sheetjs.com, dat in deze omgeving niet bereikbaar is).
+  `read-excel-file` is lichter (alleen lezen, geen schrijf-/opmaakfunctionaliteit) en kende geen
+  van die problemen.
+- **Vitest**: rekenregels (`src/lib/inkoopadvies.ts`, `src/lib/arrangementen.ts`,
+  `src/lib/recras-import.ts`) en CSV/Lightspeed-parsing (`src/lib/csv.ts`, `src/lib/telsheet.ts`,
+  `src/lib/lightspeed-import.ts`), 53 tests.
 
 ## Architectuur: client-side state, geen server/database
 
@@ -64,7 +72,7 @@ localStorage als persistentielaag, niet een database. Dat betekent:
 | **Koppeltabel** | Lightspeed ↔ Sligro-koppeling, filterpills | Alleen-lezen (zoals fase 1) |
 | **Leveringen** | Kaart per bestelling/levering | Alleen-lezen; leveringen komen binnen via de Lightspeed-importknop of worden handmatig toegevoegd aan de brondata |
 | **Trends** | Verkoop per periode per artikel (sluit `arrangement_alleen`-artikelen uit) | Alleen-lezen; nieuwe kolom verschijnt automatisch na een Lightspeed-import |
-| **Arrangementen** *(nieuw)* | Boekingen + sjablonen (arrangementen) + extra opties | Volledige CRUD |
+| **Arrangementen** | Boekingen (per RECRAS-boeking gegroepeerd) + productsjablonen | RECRAS-import, handmatige boeking toevoegen, sjablonen CRUD |
 | **Inkoopadvies** | Rekenmodule + seizoenkiezer + "werkelijke bestelling"-kolom + bestellijst-modal | Seizoen activeren/deactiveren, werkelijke-bestelling-override, bestellijst genereren (print/CSV) |
 | **Beheer → Seizoenen** *(nieuw)* | Per seizoen: naam, doelvoorraad per artikel | Seizoenen aanmaken/hernoemen/verwijderen, activeren, én bewerken — ook als het niet het actieve seizoen is |
 
@@ -103,9 +111,46 @@ nodig → vaste voorraad met buffer-overrides → tekort → te bestellen), met 
 
 ### Arrangementen (`src/lib/arrangementen.ts`)
 
-Optie-items met een `vervangt`-veld nemen het aandeel van dat standaarditem over (subset, niet
-erbovenop) — bv. 4 halal + 2 glutenvrij + 34 regulier telt op tot 40 personen, niet 46. Zie
-`test/arrangementen.test.ts` voor de uitgewerkte rekenvoorbeelden.
+Eén boeking is gekoppeld aan precies één productsjabloon (`Arrangement`): verbruik =
+sjabloon-items × `aantal_personen`. Telt alleen mee in "benodigd uit arrangementen" (en dus in
+het inkoopadvies) als (a) de boeking `status === "definitief"` is, (b) de boeking binnen de
+"weken vooruit"-horizon valt, én (c) het gekoppelde sjabloon zelf op status "zeker" staat (niet
+"controleer"). Zie `test/arrangementen.test.ts`.
+
+> **Afwijking van een eerdere iteratie**: hiervóór bestond er een aparte "Optie"-entiteit met een
+> `vervangt`-mechanisme, bedoeld om bv. 4 halal + 2 glutenvrij + 34 regulier tot 40 personen op te
+> laten tellen (subset, niet erbovenop) i.p.v. één vast sjabloon per boeking. Die structuur is
+> losgelaten toen we de eerste echte RECRAS-export zagen (zie hieronder): RECRAS zelf levert geen
+> hoofd/sub-structuur, alleen een platte lijst losse productregels per boeking. Een dieetvariant
+> zou in RECRAS dus als eigen productregel/sjabloon binnenkomen (en dan **optellen**, niet een deel
+> vervangen) — dat is nu bewust de aanname, totdat een echt voorbeeld met zo'n geval laat zien dat
+> dit niet klopt.
+
+## RECRAS-import (`src/lib/recras-import.ts`, `RecrasImportKnop.tsx`)
+
+Zolang er geen live koppeling met RECRAS is, levert Tim periodiek het rapport "Geboekte
+producten" aan als .xlsx-export. Die export bevat per RECRAS-boeking (bv. `29631-1`) meerdere
+losse productregels, elk met eigen tijdslot/aantal/status (`definitief`/`optie`/`voltooid`) — geen
+hoofd/sub-structuur. De "Boekingen importeren (RECRAS)"-knop op de Arrangementen-tab:
+
+1. Leest het bestand clientside in (`read-excel-file`) en zet de rijen om naar genormaliseerde
+   regels (`parseRecrasRijen`) — rijen zonder boekingnummer, productnaam of geldige datum worden
+   overgeslagen. Datums worden herkend als `Date`, als tekst (`"2026-10-27 00:00:00"`) of als
+   Excel-seriegetal.
+2. Matcht elke regel aan een bestaand productsjabloon **op exacte naam** (na trim/lowercase —
+   `matchRecrasRegels`). Geen fuzzy matching: RECRAS-productnamen zijn vrije tekst, en een verkeerde
+   automatische koppeling is duurder dan een gemiste.
+3. Toont een review-stap met de aantallen per status en een lijst ongematchte productnamen; voor
+   elke kun je aanvinken of er nu een nieuw sjabloon voor aangemaakt moet worden (status
+   "controleer", Sligro-verbruik vul je daarna handmatig in op de sjabloonkaart).
+4. Bij bevestigen vervangt de import **alle eerder via RECRAS geïmporteerde boekingen** (een
+   verse, volledige momentopname) — handmatig toegevoegde boekingen (`bron: "handmatig"`) blijven
+   staan. Boekingen zonder (of met een nog niet op "zeker" gezet) sjabloon tellen gewoon mee in de
+   boekingenlijst, maar met 0 verbruik, totdat je ze koppelt/bevestigt.
+
+Alleen boekingen met status "definitief" tellen mee in het inkoopadvies (zie hierboven);
+"optie"/"voltooid" staan wel in de lijst, ter info. Elke productregel toont een select om het
+gekoppelde sjabloon te wijzigen — ook nuttig als de automatische naam-match een keer fout zit.
 
 ## CSV-formaten
 
@@ -147,6 +192,11 @@ npm run build    # astro check + astro build (output naar dist/client)
    uit fase 1, zie `LeveringenTab.tsx`.
 6. **Dubbele koppeltabel-regels per Sligro-artikelnummer** (bv. 845175, 150819, 153070) — zie
    git-historie fase 1; nog steeds niet samengevoegd, bewust, net als de onderliggende skill.
+7. **RECRAS-koppeling is nog een handmatige .xlsx-import**, geen live API — zie "RECRAS-import"
+   hierboven. Wordt vervangen zodra er een echte koppeling met RECRAS komt.
+8. **Dieetvarianten/vervangende producten bij een boeking** worden nu als losse, optellende
+   productregel aangenomen (zie de afwijking hierboven) — nog te bevestigen aan een echt
+   RECRAS-voorbeeld met zo'n geval.
 
 ## Iframe-inbedding
 

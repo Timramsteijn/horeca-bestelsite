@@ -184,13 +184,7 @@ export function InkoopadviesTab() {
 
   const benodigdUitArrangementen = useMemo(() => {
     if (!data) return {};
-    return berekenBenodigdUitArrangementen(
-      data.boekingen,
-      data.arrangementen,
-      data.opties,
-      vandaag(),
-      wekenVooruit,
-    );
+    return berekenBenodigdUitArrangementen(data.boekingen, data.arrangementen, vandaag(), wekenVooruit);
   }, [data, wekenVooruit]);
 
   const seizoenen = data?.seizoenen ?? [];
