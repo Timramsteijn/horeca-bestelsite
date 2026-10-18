@@ -69,7 +69,7 @@ localStorage als persistentielaag, niet een database. Dat betekent:
 | Tab | Inhoud | Schrijfacties |
 | --- | --- | --- |
 | **Voorraad** | Tabel, zoeken, mutatiehistorie | Per-rij "Bijwerken" (telling), bulkmodus "Hele lijst bijwerken", telsheet export/import (CSV), artikelgegevens bewerken (omschrijving/verpakkingsgrootte/status/alleen-arrangementen) |
-| **Koppeltabel** | Lightspeed ↔ Sligro-koppeling, filterpills | Alleen-lezen (zoals fase 1) |
+| **Koppeltabel** | Lightspeed ↔ Sligro-koppeling, filterpills | Volledige CRUD: koppeling toevoegen/bewerken/verwijderen |
 | **Leveringen** | Kaart per bestelling/levering | Alleen-lezen; leveringen komen binnen via de Lightspeed-importknop of worden handmatig toegevoegd aan de brondata |
 | **Trends** | Verkoop per periode per artikel (sluit `arrangement_alleen`-artikelen uit) | Alleen-lezen; nieuwe kolom verschijnt automatisch na een Lightspeed-import |
 | **Arrangementen** | Boekingen (per RECRAS-boeking gegroepeerd) + productsjablonen | RECRAS-import, handmatige boeking toevoegen, sjablonen CRUD |

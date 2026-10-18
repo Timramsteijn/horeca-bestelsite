@@ -7,6 +7,7 @@ import type {
   ArrangementStatus,
   ArtikelStatus,
   Boeking,
+  KoppeltabelRow,
   SligroData,
 } from "../types/sligro";
 import type { RecrasMatchRegel } from "./recras-import";
@@ -71,6 +72,11 @@ interface SligroStore {
     perArtikelStuks: Record<string, number>,
     datum: string,
   ) => void;
+
+  // Geeft false (en doet niets) als dit pid al bestaat.
+  voegKoppeltabelRijToe: (row: KoppeltabelRow) => boolean;
+  updateKoppeltabelRij: (pid: string, patch: Partial<Omit<KoppeltabelRow, "pid">>) => void;
+  verwijderKoppeltabelRij: (pid: string) => void;
 
   maakArrangement: (naam: string) => string;
   maakArrangementenBulk: (entries: { naam: string; status: ArrangementStatus }[]) => Record<string, string>;
@@ -199,6 +205,26 @@ export const useSligroStore = create<SligroStore>()(
             item.aantal_stuks = Math.max(0, item.aantal_stuks - verkocht);
             item.laatst_bijgewerkt = datum;
           }
+        });
+      },
+
+      voegKoppeltabelRijToe: (row) => {
+        if (get().data?.koppeltabel.some((r) => r.pid === row.pid)) return false;
+        set((state) => {
+          state.data?.koppeltabel.push(row);
+        });
+        return true;
+      },
+      updateKoppeltabelRij: (pid, patch) => {
+        set((state) => {
+          const rij = state.data?.koppeltabel.find((r) => r.pid === pid);
+          if (rij) Object.assign(rij, patch);
+        });
+      },
+      verwijderKoppeltabelRij: (pid) => {
+        set((state) => {
+          if (!state.data) return;
+          state.data.koppeltabel = state.data.koppeltabel.filter((r) => r.pid !== pid);
         });
       },
 
