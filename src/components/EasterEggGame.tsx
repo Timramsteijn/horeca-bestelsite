@@ -23,23 +23,25 @@ const KLEUR = {
 const CANVAS_BREEDTE = 640;
 const CANVAS_HOOGTE = 220;
 const GROND_Y = CANVAS_HOOGTE - 36;
-const SPELER_X = 64;
+// De vrachtwagen blijft helemaal links staan en laat daar steeds een pakketje
+// vallen; de speler staat rechts, pakketjes rollen van de wagen naar de
+// speler toe (dus naar rechts) in plaats van andersom.
+const VRACHTWAGEN_X = 18;
+const VRACHTWAGEN_BREEDTE = 72;
+const PAKKETJE_START_X = VRACHTWAGEN_X + VRACHTWAGEN_BREEDTE - 6;
+const SPELER_X = CANVAS_BREEDTE - 140;
 const SPELER_BREEDTE = 28;
 const SPELER_HOOGTE = 38;
 const ZWAARTEKRACHT = 2200; // px/s²
 const SPRONG_SNELHEID = 760; // px/s
-const START_SNELHEID = 260; // px/s, snelheid waarmee obstakels naderen
+const START_SNELHEID = 260; // px/s, snelheid waarmee pakketjes naderen
 const MAX_SNELHEID = 560;
+const JOLT_DUUR = 180; // ms, kort bounce-effect op de wagen bij het laten vallen
 
 interface Obstakel {
   x: number;
   breedte: number;
   hoogte: number;
-}
-
-interface Vrachtwagen {
-  x: number;
-  afgeleverd: boolean;
 }
 
 type SpelStatus = "wachten" | "spelen" | "afgelopen";
@@ -73,8 +75,8 @@ function TruckJumpGame() {
   const springend = useRef(false);
   const snelheid = useRef(START_SNELHEID);
   const obstakels = useRef<Obstakel[]>([]);
-  const vrachtwagens = useRef<Vrachtwagen[]>([]);
   const volgendeSpawn = useRef(0);
+  const joltTot = useRef(0);
   const afstand = useRef(0);
   const statusRef = useRef<SpelStatus>("wachten");
   const animatieFrame = useRef(0);
@@ -90,8 +92,8 @@ function TruckJumpGame() {
     springend.current = false;
     snelheid.current = START_SNELHEID;
     obstakels.current = [];
-    vrachtwagens.current = [];
     volgendeSpawn.current = 600;
+    joltTot.current = 0;
     afstand.current = 0;
     setScore(0);
   }
@@ -167,23 +169,27 @@ function TruckJumpGame() {
       ctx.fill();
     }
 
-    function tekenVrachtwagen(v: Vrachtwagen) {
+    function tekenVrachtwagen(tijd: number) {
       if (!ctx) return;
-      const y = GROND_Y - 26;
+      // Korte "bounce" vlak na het laten vallen van een pakketje, puur voor
+      // het gevoel dat de wagen net iets kwijtraakte.
+      const nogJolt = Math.max(0, joltTot.current - tijd);
+      const bounce = nogJolt > 0 ? Math.sin((nogJolt / JOLT_DUUR) * Math.PI) * 3 : 0;
+      const y = GROND_Y - 26 - bounce;
       ctx.fillStyle = KLEUR.vrachtwagen;
       ctx.beginPath();
-      ctx.roundRect(v.x, y, 54, 26, 4);
+      ctx.roundRect(VRACHTWAGEN_X, y, 54, 26, 4);
       ctx.fill();
       ctx.beginPath();
-      ctx.roundRect(v.x + 54, y + 6, 18, 20, 3);
+      ctx.roundRect(VRACHTWAGEN_X + 54, y + 6, 18, 20, 3);
       ctx.fill();
       ctx.fillStyle = KLEUR.vrachtwagenRaam;
-      ctx.fillRect(v.x + 58, y + 9, 9, 7);
+      ctx.fillRect(VRACHTWAGEN_X + 58, y + 9, 9, 7);
       ctx.fillStyle = KLEUR.poppetje;
       ctx.beginPath();
-      ctx.arc(v.x + 14, y + 26, 5, 0, Math.PI * 2);
-      ctx.arc(v.x + 44, y + 26, 5, 0, Math.PI * 2);
-      ctx.arc(v.x + 68, y + 26, 5, 0, Math.PI * 2);
+      ctx.arc(VRACHTWAGEN_X + 14, y + 26, 5, 0, Math.PI * 2);
+      ctx.arc(VRACHTWAGEN_X + 44, y + 26, 5, 0, Math.PI * 2);
+      ctx.arc(VRACHTWAGEN_X + 68, y + 26, 5, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -233,30 +239,23 @@ function TruckJumpGame() {
         afstand.current += snelheid.current * delta;
         setScore(Math.floor(afstand.current / 10));
 
-        // Vrachtwagens: rijden door, laten één krat vallen en verdwijnen weer
+        // De wagen staat vast links en laat er met tussenpozen een pakketje
+        // vallen, dat vervolgens naar rechts (richting de speler) rolt.
         volgendeSpawn.current -= snelheid.current * delta;
         if (volgendeSpawn.current <= 0) {
-          vrachtwagens.current.push({ x: CANVAS_BREEDTE + 20, afgeleverd: false });
+          obstakels.current.push({
+            x: PAKKETJE_START_X,
+            breedte: 20 + Math.random() * 10,
+            hoogte: 20 + Math.random() * 14,
+          });
+          joltTot.current = tijd + JOLT_DUUR;
           volgendeSpawn.current = 260 + Math.random() * 260;
         }
 
-        for (const v of vrachtwagens.current) {
-          v.x -= snelheid.current * 1.15 * delta;
-          if (!v.afgeleverd && v.x < CANVAS_BREEDTE - 160) {
-            v.afgeleverd = true;
-            obstakels.current.push({
-              x: v.x,
-              breedte: 20 + Math.random() * 10,
-              hoogte: 20 + Math.random() * 14,
-            });
-          }
-        }
-        vrachtwagens.current = vrachtwagens.current.filter((v) => v.x > -100);
-
         for (const o of obstakels.current) {
-          o.x -= snelheid.current * delta;
+          o.x += snelheid.current * delta;
         }
-        obstakels.current = obstakels.current.filter((o) => o.x > -40);
+        obstakels.current = obstakels.current.filter((o) => o.x < CANVAS_BREEDTE + 40);
 
         for (const o of obstakels.current) {
           if (botsing(o)) {
@@ -266,7 +265,7 @@ function TruckJumpGame() {
         }
       }
 
-      for (const v of vrachtwagens.current) tekenVrachtwagen(v);
+      tekenVrachtwagen(tijd);
       for (const o of obstakels.current) tekenObstakel(o);
       tekenSpeler();
 
