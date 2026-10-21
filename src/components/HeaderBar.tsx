@@ -4,6 +4,7 @@ import { useSligroData } from "../hooks/useSligroData";
 import { useSligroStore } from "../lib/store";
 import { extractPeriode, matchLightspeedRijen, parseLightspeedReport } from "../lib/lightspeed-import";
 import { formatDateTime } from "../lib/format";
+import { EasterEggLogo } from "./EasterEggGame";
 
 interface ImportMelding {
   type: "success" | "error";
@@ -88,7 +89,10 @@ export function HeaderBar({ title }: { title: string }) {
             </p>
           )}
         </div>
-        {importKnop}
+        <div className="flex items-center gap-2">
+          <EasterEggLogo />
+          {importKnop}
+        </div>
       </div>
 
       <div className="flex desktop:hidden items-center justify-between gap-2 border-b border-border-light bg-white px-[18px] py-2.5">
@@ -97,7 +101,10 @@ export function HeaderBar({ title }: { title: string }) {
             Bijgewerkt: {formatDateTime(data.gegenereerd_op)}
           </p>
         )}
-        {importKnop}
+        <div className="flex items-center gap-2">
+          <EasterEggLogo />
+          {importKnop}
+        </div>
       </div>
 
       {melding && (
