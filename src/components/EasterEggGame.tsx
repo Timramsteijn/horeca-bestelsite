@@ -161,11 +161,11 @@ function TruckJumpGame() {
       ctx.beginPath();
       ctx.arc(SPELER_X + SPELER_BREEDTE / 2, y + 6, 8, 0, Math.PI * 2);
       ctx.fill();
-      // Dienblad (arm + blad), iets voor het lijf uit
+      // Dienblad (arm + blad), aan de kant van de aankomende pakketjes
       ctx.fillStyle = KLEUR.dienblad;
-      ctx.fillRect(SPELER_X + SPELER_BREEDTE - 2, y + 14, 16, 3);
+      ctx.fillRect(SPELER_X - 14, y + 14, 16, 3);
       ctx.beginPath();
-      ctx.roundRect(SPELER_X + SPELER_BREEDTE + 8, y + 10, 4, 4, 1);
+      ctx.roundRect(SPELER_X - 14, y + 10, 4, 4, 1);
       ctx.fill();
     }
 
@@ -176,20 +176,29 @@ function TruckJumpGame() {
       const nogJolt = Math.max(0, joltTot.current - tijd);
       const bounce = nogJolt > 0 ? Math.sin((nogJolt / JOLT_DUUR) * Math.PI) * 3 : 0;
       const y = GROND_Y - 26 - bounce;
+      // Cabine links, laadbak rechts — de achterklep (waar de pakketjes uit
+      // vallen) wijst dus naar de speler toe.
       ctx.fillStyle = KLEUR.vrachtwagen;
       ctx.beginPath();
-      ctx.roundRect(VRACHTWAGEN_X, y, 54, 26, 4);
+      ctx.roundRect(VRACHTWAGEN_X, y + 6, 18, 20, 3);
       ctx.fill();
       ctx.beginPath();
-      ctx.roundRect(VRACHTWAGEN_X + 54, y + 6, 18, 20, 3);
+      ctx.roundRect(VRACHTWAGEN_X + 18, y, 54, 26, 4);
       ctx.fill();
       ctx.fillStyle = KLEUR.vrachtwagenRaam;
-      ctx.fillRect(VRACHTWAGEN_X + 58, y + 9, 9, 7);
+      ctx.fillRect(VRACHTWAGEN_X + 5, y + 9, 9, 7);
+      // Achterklep: duidelijke streep aan de rechterkant van de laadbak
+      ctx.strokeStyle = KLEUR.vrachtwagenRaam;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(VRACHTWAGEN_X + VRACHTWAGEN_BREEDTE - 3, y + 3);
+      ctx.lineTo(VRACHTWAGEN_X + VRACHTWAGEN_BREEDTE - 3, y + 23);
+      ctx.stroke();
       ctx.fillStyle = KLEUR.poppetje;
       ctx.beginPath();
-      ctx.arc(VRACHTWAGEN_X + 14, y + 26, 5, 0, Math.PI * 2);
-      ctx.arc(VRACHTWAGEN_X + 44, y + 26, 5, 0, Math.PI * 2);
-      ctx.arc(VRACHTWAGEN_X + 68, y + 26, 5, 0, Math.PI * 2);
+      ctx.arc(VRACHTWAGEN_X + 4, y + 26, 5, 0, Math.PI * 2);
+      ctx.arc(VRACHTWAGEN_X + 28, y + 26, 5, 0, Math.PI * 2);
+      ctx.arc(VRACHTWAGEN_X + 58, y + 26, 5, 0, Math.PI * 2);
       ctx.fill();
     }
 
